@@ -68,4 +68,18 @@ Now, you can generate the representations of the ELM transformer model in the co
 
 We will do this task in the local Python environment mainly using the [huggingface](https://huggingface.co/) package instead of in the conda environment.
 
-Doing this task is as simple as running `python3 transformer2HDF5.py`. The credits should go to [here](https://github.com/johnmwu/contextual-corr-analysis/blob/dev/get_transformer_attentions.py)
+Doing this task is as simple as running `python3 transformer2HDF5.py`. The credits should go to [here](https://github.com/johnmwu/contextual-corr-analysis/blob/dev/get_transformer_representations.py)
+
+# 5. Generate attentions of Bert, GPT2, and XLNet
+
+Similarly, we will do this task in the local Python environment.
+
+Doing this task is as simple as running `python3 attention2HDF5.py`. The credits should go to [here](https://github.com/johnmwu/contextual-corr-analysis/blob/dev/get_transformer_attentions.py)
+
+# 6. Generate representations with random weights of GPT2 and XLNet
+
+Again, we will do this task in the local Python environment.
+
+Doing this task is as simple as running `python3 transformers2HDF5_rand.py`. The credits should go to [here](https://github.com/johnmwu/contextual-corr-analysis/blob/dev/get_transformer_representations.py)
+
+# 7. 
