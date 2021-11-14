@@ -62,4 +62,10 @@ The idea of doing this is instead of returning the averaged representations, we 
 
 ## 3.3 Generate the representations
 
-Now, you can generate the representations of the ELM transformer model in the environment by running `python elmo_transformer2HDF5.py`. The representations are stored in `elmo_transformer.hdf5`.
+Now, you can generate the representations of the ELM transformer model in the conda environment by running `python elmo_transformer2HDF5.py`. The representations are stored in `elmo_transformer.hdf5`.
+
+# 4. Generate representations of Bert, XLNet, GPT, and GPT2
+
+We will do this task in the local Python environment mainly using the [huggingface](https://huggingface.co/) package instead of in the conda environment.
+
+Doing this task is as simple as running `python3 transformer2HDF5.py`. The credits should go to [here](https://github.com/johnmwu/contextual-corr-analysis/blob/dev/get_transformer_attentions.py)
