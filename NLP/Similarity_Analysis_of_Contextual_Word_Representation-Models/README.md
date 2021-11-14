@@ -1,6 +1,20 @@
 # Similarity Analysis of Contextual Word Representation Models
-With the instructions and code in this repo, you should be able to reproduce the content of the paper [Similarity Analysis of Contextual Word Representation Models](https://arxiv.org/pdf/2005.01172.pdf). I will focus on how to implement the output of the paper instead of how the idea in the paper is developed.
+With the instructions and code in this repo, you should be able to reproduce the content of the paper [Similarity Analysis of Contextual Word Representation Models](https://arxiv.org/pdf/2005.01172.pdf). I will focus on paper implementation instead of explanation.
 
-#1 Data Preparation
-## 1.1 Find the data-set
-According to the authors, the data-set used in the paper is the development set of Penn Treebank data. You can obtain the raw data-set and preprocess using the `sanity_check.py` file.
+#1. Data Preparation
+According to the authors, the data-set used in the paper is the development set of Penn Treebank data. You can obtain the raw data-set and preprocess using the `sanity_check.py` file by the command `python3 sanity_check.py`.
+
+The general idea of the process is to make sure sentences in the output are newline delimited, and tokens are space-delimited. Moreover, the file also ensures that for the same sentence, the `sequence_length` by different NLP models is the same for the sake of matrix multiplication.
+
+The output of the file is `PennTreebank_develp_set.txt`, which is ready for generating representation files by different NLP models.
+
+#2. Generate representations of the original ELM model
+## 2.1 Environment setup
+The authors of the paper set up the environment by following the `Installation` part in this [repo](https://github.com/nelson-liu/contextual-repr-analysis). If you run into problems when doing the unit test by `py.test -v`, please make sure the package version is correct and it points to the Python in the environment instead of the system Python. If the package does not point to the Python in the environment, probably you have to edit the `$PATH` variable.
+
+## 2.2 Generate representations
+
+In the conda environment, you can obtain the representations of the original ELM model by running this command:
+
+`allennlp elmo ./PennTreebank_develp_set.txt elmo_original.hdf5 --all --weight-file https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_weights.hdf5 --options-file https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_options.json
+`where `elmo_original.hdf5` is the output file that stores the representations. The file format follows this [description](https://github.com/nelson-liu/contextual-repr-analysis#step-1-precomputing-the-word-representations).
