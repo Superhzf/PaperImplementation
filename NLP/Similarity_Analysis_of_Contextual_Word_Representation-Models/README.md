@@ -32,7 +32,7 @@ You can download the ELM transformer model (1.73GB) by opening [this page](https
 
 In order to finish this task, we have to modify the `allennlp` package in the conda environment (If you can find any easier to do it, please let me know), since `allennlp` package can only output the representations of the final layer instead of all the middle layers.
 
-First, we have to find out where the `allennlp` is installed by doing this:
+1. we have to find out where the `allennlp` is installed by doing this:
 
 ```
 import allennlp
@@ -43,11 +43,9 @@ allennlp.__file__
 The output should similar to this
 `/Users/yourname/opt/miniconda3/envs/contextual_repr_analysis/lib/python3.6/site-packages/allennlp/__init__.py`
 
-Next, go to the `allennlp` folder by `cd /Users/yourname/opt/miniconda3/envs/contextual_repr_analysis/lib/python3.6/site-packages/allennlp/modules/token_embedders`
+2. Go to the `allennlp` folder by `cd /Users/yourname/opt/miniconda3/envs/contextual_repr_analysis/lib/python3.6/site-packages/allennlp/modules/token_embedders`
 
-Then, in the folder, edit the file by `vim language_model_token_embedder.py`.
+3. In the folder, edit the file by `vim language_model_token_embedder.py`, and in the file, set up the line numbers by `set number` and we will start from line 172.
 
-Next, in the file, set up the line numbers by `set number` and we will start from line 172.
-
-Ten, 
+4. 
 `
