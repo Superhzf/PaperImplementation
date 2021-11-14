@@ -6,7 +6,7 @@ According to the authors, the data-set used in the paper is the development set 
 
 The general idea of the process is to make sure sentences in the output are newline delimited, and tokens are space-delimited. Moreover, the file also ensures that for the same sentence, the `sequence_length` by different NLP models is the same for the sake of matrix multiplication.
 
-The output of the file is `PennTreebank_develp_set.txt`, which is ready for generating representation files by different NLP models.
+The output of the file is `PennTreebank_develp_set.txt`.
 
 # 2. Generate representations of the original ELM model
 ## 2.1. Environment setup
