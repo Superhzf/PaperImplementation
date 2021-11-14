@@ -2,7 +2,7 @@
 With the instructions and code in this repo, you should be able to reproduce the content of the paper [Similarity Analysis of Contextual Word Representation Models](https://arxiv.org/pdf/2005.01172.pdf). I will focus on paper implementation instead of explanation. I run the instructions on MacOS Big Sur v11.6., it might be different on Windows systems.
 
 # 1. Data Preparation
-According to the authors, the data-set used in the paper is the development set of `Penn Treebank` data. You can obtain the raw data-set and preprocess using the `sanity_check.py` file by the command `python3 sanity_check.py`.
+According to the authors, the data-set used in the paper is the development set of `Penn Treebank` data. You can obtain the raw data-set and preprocess using the `sanity_check.py` file by the command `python3 sanity_check.py` in your local Python environment.
 
 The general idea of the process is to make sure sentences in the output are newline delimited, and tokens are space-delimited. Moreover, the file also ensures that for the same sentence, the `sequence_length` by different NLP models is the same for the sake of matrix multiplication.
 
