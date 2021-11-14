@@ -82,4 +82,14 @@ Again, we will do this task in the local Python environment.
 
 Doing this task is as simple as running `python3 transformers2HDF5_rand.py`. The credits should go to [here](https://github.com/johnmwu/contextual-corr-analysis/blob/dev/get_transformer_representations.py)
 
-# 7. 
+# 7. Analysis
+
+Now, we have collected all the data needed to reproduce the analysis in the paper.
+
+Below I will refer you to the analysis file in the authors' Github repo. Basically, you calculate different statistical variables based on experiments [here](https://github.com/johnmwu/contextual-corr-analysis/tree/master/slurm), and you can analyze the variables and draw pictures based on the experiments [here](https://github.com/johnmwu/contextual-corr-analysis/tree/master/analysis).
+
+In particular, if you want to reproduce Figure 1.(a) and 1.(b) in the paper, you have to focus on [experiment 14](https://github.com/johnmwu/contextual-corr-analysis/blob/master/slurm/mk_results14-helper.sh), and [analysis 14](https://github.com/johnmwu/contextual-corr-analysis/blob/master/analysis/analysis-14.ipynb).
+
+Similarly, if you want to reproduce Figure 2 in the paper, you have to focus on experiment 13 or 15.
+
+The idea to find out which experiment you should do is first finding out the pictures you want in the folder [experiment](https://github.com/johnmwu/contextual-corr-analysis/tree/master/analysis) among `*.png` files, and then find out which experiment generates this picture among `*.ipynb` files.
