@@ -10,7 +10,7 @@ The output of the file is `PennTreebank_develp_set.txt`, which is ready for gene
 
 # 2. Generate representations of the original ELM model
 ## 2.1. Environment setup
-The authors of the paper set up the environment by following the `Installation` part in this [repo](https://github.com/nelson-liu/contextual-repr-analysis). If you run into problems when doing the unit test by `py.test -v`, please make sure the package version is correct and it points to the Python in the environment instead of the system Python. If the package does not point to the Python in the environment, probably you have to edit the `$PATH` variable.
+The authors of the paper obtain some representations based on the environment by the `Installation` part in this [repo](https://github.com/nelson-liu/contextual-repr-analysis). If you run into problems when doing the unit test by `py.test -v`, please make sure the package version is correct and it points to the Python in the conda environment instead of the system Python. If the package does not point to the Python in the conda environment, probably you have to edit the `$PATH` variable.
 
 ## 2.2. Generate representations
 
