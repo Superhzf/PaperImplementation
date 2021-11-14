@@ -30,9 +30,9 @@ You can download the ELM transformer model (1.73GB) by opening [this page](https
 
 ## 3.2 Package modification
 
-In order to finish this task, we have to modify the `allennlp` package in the conda environment (If you can find any easier to do it, please let me know), since `allennlp` package can only output the representations of the final layer instead of all the middle layers.
+In order to finish this task, we have to modify the `allennlp` package in the conda environment (If you can find any easier to do it, please let me know), since `allennlp` package can only output the averaged representations of layers instead of all the middle layers separately.
 
-1. we have to find out where the `allennlp` is installed by doing this:
+1. We have to find out where the `allennlp` is installed by doing this:
 
 ```
 import allennlp
@@ -45,7 +45,21 @@ The output should similar to this
 
 2. Go to the `allennlp` folder by `cd /Users/yourname/opt/miniconda3/envs/contextual_repr_analysis/lib/python3.6/site-packages/allennlp/modules/token_embedders`
 
-3. In the folder, edit the file by `vim language_model_token_embedder.py`, and in the file, set up the line numbers by `set number` and we will start from line 172.
+3. In the folder, edit the file by `vim language_model_token_embedder.py`, and in the file, set up the line numbers by `:set number` and we will start from line 172.
 
-4. 
-`
+4. Add these lines below line 173
+```
+tensor_contextual_embed = torch.cat(contextual_embeddings,dim=0)
+if self._remove_bos_eos:
+  tensor_contextual_embed=tensor_contextual_embed[:,1:-1,:]
+return tensor_contextual_embed
+```
+and comment out other lines that are related to `averaged_embeddings`.
+
+The idea of doing this is instead of returning the averaged representations, we want the representations of all the middle layers. `1:-1` means I want to remove the special characters in the front and at the end.
+
+5. Finally save the modification and exit.
+
+## 3.3 Generate the representations
+
+Now, you can generate the representations of the ELM transformer model in the environment by running `python elmo_transformer2HDF5.py`. The representations are stored in `elmo_transformer.hdf5`.
