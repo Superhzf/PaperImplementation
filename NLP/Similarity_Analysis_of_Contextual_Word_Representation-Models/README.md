@@ -3,9 +3,4 @@ With the instructions and code in this repo, you should be able to reproduce the
 
 #1 Data Preparation
 ## 1.1 Find the data-set
-According to the authors, the data-set used in the paper is the development set of Penn Treebank data. You can obtain the data-set by doing this:
-```
-from torchtext.datasets import PennTreebank
-
-_,development_set,_ = PennTreebank(root='.data', split=('train', 'valid', 'test'))
-```
+According to the authors, the data-set used in the paper is the development set of Penn Treebank data. You can obtain the raw data-set and preprocess using the `sanity_check.py` file.
