@@ -1,6 +1,6 @@
 # https://github.com/pytorch/examples/tree/master/word_language_model
 # https://pytorch.org/tutorials/beginner/transformer_tutorial.html
-from model import batchify, train, export_onnx, bptt, TransformerModel, evaluate
+from LM_model import batchify, train, export_onnx, bptt, TransformerModel, evaluate
 from data_preprocessing import Corpus
 import torch
 from torch import nn
