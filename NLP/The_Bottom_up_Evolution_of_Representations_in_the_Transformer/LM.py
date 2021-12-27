@@ -8,6 +8,9 @@ import time
 import math
 import copy
 
+# In development mode, I use a small dataset for faster iteration.
+DEVELOPMENT_MODE = True
+
 # Set the random seed manually for reproducibility.
 torch.manual_seed(1234)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -18,7 +21,7 @@ models_folder = './TrainedModels/'
 batch_size = 20
 eval_batch_size = 10
 # In development mode, I use a small dataset for faster iteration.
-corpus = Corpus(path=data_source,development_mode=True)
+corpus = Corpus(path=data_source,development_mode=DEVELOPMENT_MODE)
 
 train_data = batchify(corpus.train, batch_size)
 val_data = batchify(corpus.val, eval_batch_size)
