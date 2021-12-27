@@ -18,10 +18,10 @@ class Dictionary(object):
 
 
 class Corpus(object):
-    def __init__(self, path, development_model=False):
+    def __init__(self, path, development_mode=False):
         self.dictionary = Dictionary()
         # TODO: currently, it only works for LM problem.
-        if not development_model:
+        if not development_mode:
             self.train = self.tokenize(os.path.join(path, 'preprocessed_en_trn.txt'))
             self.val = self.tokenize(os.path.join(path, 'preprocessed_en_val.txt'))
         else:
