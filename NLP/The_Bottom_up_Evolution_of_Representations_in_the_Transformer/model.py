@@ -13,6 +13,7 @@ from torchtext.vocab import build_vocab_from_iterator
 
 import copy
 import time
+import os
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # TODO: need more information about bptt
@@ -111,11 +112,6 @@ class TransformerModel(nn.Module):
         output = self.decoder(output)
         return output
 
-def data_process(raw_text_iter: dataset.IterableDataset) -> Tensor:
-    """Converts raw text into a flat Tensor."""
-    data = [torch.tensor(vocab(tokenizer(item)), dtype=torch.long) for item in raw_text_iter]
-    return torch.cat(tuple(filter(lambda t: t.numel() > 0, data)))
-
 def batchify(data: Tensor, bsz: int) -> Tensor:
     """Divides the data into bsz separate sequences, removing extra elements
     that wouldn't cleanly fit.
@@ -144,10 +140,10 @@ def get_batch(source: Tensor, i: int) -> Tuple[Tensor, Tensor]:
     """
     seq_len = min(bptt, len(source) - 1 - i)
     data = source[i:i+seq_len]
-    target = source[i+1:i+1+seq_len].reshape(-1)
+    target = source[i+1:i+1+seq_len].view(-1)
     return data, target
 
-def train(model: nn.Module) -> None:
+def train(model: nn.Module, train_data, criterion, ntokens, optimizer) -> None:
     model.train()  # turn on train mode
     total_loss = 0.
     log_interval = 200
@@ -180,10 +176,9 @@ def train(model: nn.Module) -> None:
             total_loss = 0
             start_time = time.time()
 
-def evaluate(model: nn.Module, eval_data: Tensor) -> float:
+def evaluate(model: nn.Module, eval_data: Tensor, ntokens: int, criterion) -> float:
     model.eval()  # turn on evaluation mode
     total_loss = 0.
-    #
     src_mask = generate_square_subsequent_mask(bptt).to(device)
     with torch.no_grad():
         for i in range(0, eval_data.size(0) - 1, bptt):
@@ -196,11 +191,10 @@ def evaluate(model: nn.Module, eval_data: Tensor) -> float:
             total_loss += batch_size * criterion(output_flat, targets).item()
     return total_loss / (len(eval_data) - 1)
 
-
-def export_onnx(path, batch_size, seq_len):
+def export_onnx(path, batch_size, seq_len,model):
     print('The model is also exported in ONNX format at {}'.
-          format(os.path.realpath(args.onnx_export)))
+          format(os.path.realpath(path)))
     model.eval()
     dummy_input = torch.LongTensor(seq_len * batch_size).zero_().view(-1, batch_size).to(device)
-    hidden = model.init_hidden(batch_size)
-    torch.onnx.export(model, (dummy_input, hidden), path)
+    dummy_src = generate_square_subsequent_mask(bptt).to(device)
+    torch.onnx.export(model, (dummy_input,dummy_src), path,opset_version=10)
