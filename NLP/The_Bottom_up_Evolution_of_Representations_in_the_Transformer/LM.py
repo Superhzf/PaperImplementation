@@ -1,3 +1,4 @@
+# credits go to:
 # https://github.com/pytorch/examples/tree/master/word_language_model
 # https://pytorch.org/tutorials/beginner/transformer_tutorial.html
 from LM_model import batchify, train, export_onnx, bptt, TransformerModel, evaluate
