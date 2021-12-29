@@ -1,3 +1,5 @@
+# credits go to
+# https://pytorch.org/tutorials/beginner/translation_transformer.html
 from timeit import default_timer as timer
 from ML_model import PositionalEncoding, TokenEmbedding, Seq2SeqTransformer, train_epoch,evaluate, SRC_LANGUAGE, TGT_LANGUAGE
 from ML_model import special_symbols
