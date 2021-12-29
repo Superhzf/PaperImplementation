@@ -74,4 +74,12 @@ if __name__ == '__main__':
     print(f"Finished writing {len(flat_en_trn)} English sentences into {file_name_trn}")
     write2file(flat_en_val, data_source, file_name_val)
     print(f"Finished writing {len(flat_en_val)} English sentences into {file_name_val}")
-    # TODO: save the DE set.
+    # Write German sentences to files
+    flat_de_trn = flat_de_dataset[:train_size]
+    file_name_trn = "preprocessed_de_trn.txt"
+    flat_de_val = flat_de_dataset[train_size:]
+    file_name_val = "preprocessed_de_val.txt"
+    write2file(flat_de_trn, data_source, file_name_trn)
+    print(f"Finished writing {len(flat_de_trn)} German sentences into {file_name_trn}")
+    write2file(flat_en_val, data_source, file_name_val)
+    print(f"Finished writing {len(flat_de_val)} German sentences into {file_name_val}")
