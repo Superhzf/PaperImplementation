@@ -67,7 +67,7 @@ class CorpusML:
         #TODO: the length of two files should be the same
         min_len = min(len(src),len(tgt))
         if development_mode:
-            min_len = int(0.1*min_len)
+            min_len = int(0.01*min_len)
         for i in range(min_len):
             this_group = (src[i],tgt[i])
             data_set.append(this_group)
