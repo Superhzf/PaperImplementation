@@ -50,3 +50,25 @@ class Corpus(object):
             ids = torch.cat(idss)
 
         return ids
+
+class CorpusML:
+    def __init__(self, path, development_mode=False):
+        self.train = self.read_data(path, 'preprocessed_en_trn.txt', 'preprocessed_de_trn.txt',development_mode)
+        self.val = self.read_data(path, 'preprocessed_en_val.txt', 'preprocessed_de_val.txt',development_mode)
+
+    def read_data(self,path, file_name_src,file_name_tgt,development_mode=False):
+        data_set = []
+        src_file = os.path.join(path, file_name_src)
+        tgt_file = os.path.join(path, file_name_tgt)
+        with open(src_file,'r') as f:
+            src = f.readlines()
+        with open(tgt_file,'r') as f:
+            tgt = f.readlines()
+        #TODO: the length of two files should be the same
+        min_len = min(len(src),len(tgt))
+        if development_mode:
+            min_len = int(0.1*min_len)
+        for i in range(min_len):
+            this_group = (src[i],tgt[i])
+            data_set.append(this_group)
+        return data_set
