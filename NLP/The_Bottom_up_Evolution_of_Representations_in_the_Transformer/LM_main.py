@@ -46,7 +46,7 @@ best_model = None
 # train the model
 for epoch in range(1, epochs + 1):
     epoch_start_time = time.time()
-    train(model,train_data, criterion, ntokens, optimizer)
+    train(model,train_data, criterion, ntokens, optimizer,scheduler,epoch)
     val_loss = evaluate(model, val_data, ntokens, criterion)
     val_ppl = math.exp(val_loss)
     elapsed = time.time() - epoch_start_time

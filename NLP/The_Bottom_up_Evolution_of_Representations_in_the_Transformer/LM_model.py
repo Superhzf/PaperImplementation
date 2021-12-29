@@ -143,7 +143,7 @@ def get_batch(source: Tensor, i: int) -> Tuple[Tensor, Tensor]:
     target = source[i+1:i+1+seq_len].view(-1)
     return data, target
 
-def train(model: nn.Module, train_data, criterion, ntokens, optimizer) -> None:
+def train(model: nn.Module, train_data, criterion, ntokens, optimizer,scheduler,epoch) -> None:
     model.train()  # turn on train mode
     total_loss = 0.
     log_interval = 200
