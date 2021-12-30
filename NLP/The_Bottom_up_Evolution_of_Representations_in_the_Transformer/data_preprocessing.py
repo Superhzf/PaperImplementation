@@ -1,6 +1,8 @@
 import os
 from io import open
 import torch
+from torch.utils.data import Dataset
+from transformers import BertTokenizer
 
 class Dictionary(object):
     def __init__(self):
@@ -62,8 +64,10 @@ class CorpusMT:
         tgt_file = os.path.join(path, file_name_tgt)
         with open(src_file,'r') as f:
             src = f.readlines()
+        f.close()
         with open(tgt_file,'r') as f:
             tgt = f.readlines()
+        f.close()
         #TODO: the length of two files should be the same
         min_len = min(len(src),len(tgt))
         if development_mode:
@@ -72,3 +76,28 @@ class CorpusMT:
             this_group = (src[i],tgt[i])
             data_set.append(this_group)
         return data_set
+
+class DatasetMLM(Dataset):
+    def __init__(self, src, tokenizer):
+        self.src = src
+        self.tokenizer = tokenizer
+
+    def __len__(self):
+        return len(self.src)
+
+    def __getitem__(self, idx):
+        src = self.src[idx]
+        return src
+
+class CorpusMLM:
+    def __init__(self,path, development_mode=False):
+        self.train = self.read_data(os.path.join(path, 'preprocessed_en_trn.txt'))
+        self.val = self.read_data(os.path.join(path, 'preprocessed_en_val.txt'))
+
+    def read_data(self, path):
+        tokenizer = BertTokenizer.from_pretrained("bert-base-uncased", do_basic_tokenization = True)
+        with open(path,'r') as f:
+            src = f.readlines()
+        f.close()
+        this_dataset = DatasetMLM(src,tokenizer)
+        return this_dataset
