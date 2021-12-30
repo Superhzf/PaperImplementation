@@ -91,13 +91,21 @@ class DatasetMLM(Dataset):
 
 class CorpusMLM:
     def __init__(self,path, development_mode=False):
-        self.train = self.read_data(os.path.join(path, 'preprocessed_en_trn.txt'))
-        self.val = self.read_data(os.path.join(path, 'preprocessed_en_val.txt'))
+        self.train = self.read_data(os.path.join(path, 'preprocessed_en_trn.txt'),development_mode)
+        self.val = self.read_data(os.path.join(path, 'preprocessed_en_val.txt'),development_mode)
 
-    def read_data(self, path):
+    def read_data(self, path,development_mode=False):
         tokenizer = BertTokenizer.from_pretrained("bert-base-uncased", do_basic_tokenization = True)
         with open(path,'r') as f:
             src = f.readlines()
         f.close()
+        if development_mode:
+            src_len = int(len(src)*0.01)
+            src = src[:src_len]
         this_dataset = DatasetMLM(src,tokenizer)
         return this_dataset
+
+def data_collate_fn_MLM(dataset_samples_list):
+    arr = np.array(dataset_samples_list)
+    inputs = tokenizer(text=arr.tolist(), padding='max_length', max_length=30, return_tensors='pt')
+    return inputs
