@@ -51,7 +51,7 @@ class Corpus(object):
 
         return ids
 
-class CorpusML:
+class CorpusMT:
     def __init__(self, path, development_mode=False):
         self.train = self.read_data(path, 'preprocessed_en_trn.txt', 'preprocessed_de_trn.txt',development_mode)
         self.val = self.read_data(path, 'preprocessed_en_val.txt', 'preprocessed_de_val.txt',development_mode)

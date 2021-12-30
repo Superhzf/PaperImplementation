@@ -1,9 +1,9 @@
 # credits go to
 # https://pytorch.org/tutorials/beginner/translation_transformer.html
 from timeit import default_timer as timer
-from ML_model import PositionalEncoding, TokenEmbedding, Seq2SeqTransformer, train_epoch,evaluate, SRC_LANGUAGE, TGT_LANGUAGE
-from ML_model import special_symbols
-from ML_model import UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX
+from MT_model import PositionalEncoding, TokenEmbedding, Seq2SeqTransformer, train_epoch,evaluate, SRC_LANGUAGE, TGT_LANGUAGE
+from MT_model import special_symbols
+from MT_model import UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX
 from torchtext.vocab import build_vocab_from_iterator
 import torch
 from torchtext.data.utils import get_tokenizer
@@ -11,13 +11,13 @@ from torchtext.datasets import Multi30k
 from typing import Iterable, List
 import torch.nn as nn
 from torch.nn.utils.rnn import pad_sequence
-from data_preprocessing import CorpusML
+from data_preprocessing import CorpusMT
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def yield_tokens(data_iter: Iterable, language:str, language_index)->List[str]:
     """
-    The helper function to tokenize sentences for ML model.
+    The helper function to tokenize sentences for MT model.
 
     data_sample[language_index[language]] returns the EN or DE sentence.
     This sentence will be tokenized by token_transform[language]
@@ -55,7 +55,7 @@ data_source = "./data/"
 models_folder = './TrainedModels/'
 # In development mode, I use a small dataset for faster iteration.
 DEVELOPMENT_MODE = True
-corpus = CorpusML(data_source, development_mode=DEVELOPMENT_MODE)
+corpus = CorpusMT(data_source, development_mode=DEVELOPMENT_MODE)
 train_iter = corpus.train
 val_iter = corpus.val
 
