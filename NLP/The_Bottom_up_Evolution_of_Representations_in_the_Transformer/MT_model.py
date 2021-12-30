@@ -160,8 +160,7 @@ def train_epoch(model, optimizer, batch_size, collate_fn, loss_fn, train_iter):
 def evaluate(model, batch_size,collate_fn, loss_fn, val_iter):
     model.eval()
     losses = 0
-
-    val_iter = Multi30k(split='valid', language_pair=(SRC_LANGUAGE, TGT_LANGUAGE))
+    
     val_dataloader = DataLoader(val_iter, batch_size=batch_size, collate_fn=collate_fn)
 
     for src, tgt in val_dataloader:
