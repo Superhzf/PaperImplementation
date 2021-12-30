@@ -105,8 +105,3 @@ class CorpusMLM:
             src = src[:src_len]
         this_dataset = DatasetMLM(src,self.tokenizer)
         return this_dataset
-
-def data_collate_fn_MLM(dataset_samples_list):
-    arr = np.array(dataset_samples_list)
-    inputs = tokenizer(text=arr.tolist(), padding='max_length', max_length=30, return_tensors='pt')
-    return inputs
