@@ -102,7 +102,7 @@ class CorpusMLM:
         f.close()
         if development_mode:
             print("You are in the development mode!")
-            src_len = 1000
+            src_len = 20
             src = src[:src_len]
         this_dataset = DatasetMLM(src,self.tokenizer)
         return this_dataset
