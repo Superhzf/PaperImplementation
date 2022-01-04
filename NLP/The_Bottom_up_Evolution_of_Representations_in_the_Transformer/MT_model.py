@@ -4,7 +4,7 @@ from torchtext.datasets import Multi30k
 from torch import Tensor
 import torch
 import torch.nn as nn
-from torch.nn import Transformer
+from torch.nn import TransformerEncoderLayer, TransformerEncoder, TransformerDecoderLayer, TransformerDecoder
 import math
 from torch.utils.data import DataLoader
 
@@ -42,7 +42,16 @@ class PositionalEncoding(nn.Module):
 
 class Seq2SeqTransformer(nn.Module):
     """
-    The main model class
+    The main model class.
+    self.transformer_encoder and self.transformer_decoder can be merged into
+    a single torch.nn.modules.transformer class. I separate them into two
+    different classes because MLM and LM tasks only use self.transformer_encoder;
+    in order to make sure all three tasks share the same network architecture,
+    I decide to make Seq2SeqTransformer class inherit from TransformerModel
+    of MLM and LM tasks. Therefore, I have to split torch.nn.modules.transformer
+    into two parts.
+
+    ref:https://pytorch.org/docs/stable/_modules/torch/nn/modules/transformer.html
 
     TODO: Find out what *_padding_mask for from the MultiheadAttention class.
     """
@@ -56,16 +65,20 @@ class Seq2SeqTransformer(nn.Module):
                  dim_feedforward:int=512,
                  dropout:float=0.1):
         super(Seq2SeqTransformer, self).__init__()
-        self.transformer=Transformer(d_model=emb_size,
-                                     nhead=nhead,
-                                     num_encoder_layers=num_encoder_layer,
-                                     num_decoder_layers=num_decoder_layer,
-                                     dim_feedforward=dim_feedforward,
-                                     dropout=dropout)
         self.decoder=nn.Linear(emb_size, tgt_vocab_size)
         self.src_tok_emb = nn.Embedding(src_vocab_size, emb_size)
         self.tgt_tok_emb = nn.Embedding(tgt_vocab_size, emb_size)
         self.positional_encoding = PositionalEncoding(emb_size, dropout=dropout)
+        encoder_layers = TransformerEncoderLayer(d_model=emb_size,
+                                                 nhead=nhead,
+                                                 dim_feedforward=dim_feedforward,
+                                                 dropout=dropout)
+        self.transformer_encoder = TransformerEncoder(encoder_layers, num_encoder_layer)
+        decoder_layers = TransformerDecoderLayer(d_model=emb_size,
+                                                 nhead=nhead,
+                                                 dim_feedforward=dim_feedforward,
+                                                 dropout=dropout)
+        self.transformer_decoder = TransformerDecoder(decoder_layers, num_decoder_layer)
 
         self.init_weights()
 
@@ -88,9 +101,16 @@ class Seq2SeqTransformer(nn.Module):
         trg = self.tgt_tok_emb(trg)
         src_emb = self.positional_encoding(src)
         tgt_emb = self.positional_encoding(trg)
-        outs = self.transformer(src_emb, tgt_emb, src_mask, tgt_mask, None,
-                                src_padding_mask, tgt_padding_mask, memory_key_padding_mask)
-        return self.decoder(outs)
+        memory = self.transformer_encoder(src,
+                                          mask=src_mask,
+                                          src_key_padding_mask=src_padding_mask)
+        output = self.transformer_decoder(trg,
+                                          memory,
+                                          tgt_mask=tgt_mask,
+                                          memory_mask=None,
+                                          tgt_key_padding_mask=tgt_padding_mask,
+                                          memory_key_padding_mask=memory_key_padding_mask)
+        return self.decoder(output)
 
 def generate_square_subsequent_mask(sz):
     mask = (torch.triu(torch.ones((sz, sz), device=DEVICE)) == 1).transpose(0, 1)
