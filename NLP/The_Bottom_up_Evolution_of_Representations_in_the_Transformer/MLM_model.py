@@ -39,7 +39,7 @@ class TransformerModel(nn.Module):
         super(TransformerModel, self).__init__()
         self.model_type = 'Transformer'
         self.pos_encoder = PositionalEncoding(ninp, dropout)
-        encoder_layers = TransformerEncoderLayer(ninp, nhead, nhid, dropout, batch_first=True)
+        encoder_layers = TransformerEncoderLayer(ninp, nhead, nhid, dropout, batch_first=False)
         self.transformer_encoder = TransformerEncoder(encoder_layers, nlayers)
         self.encoder = nn.Embedding(ntoken, ninp)
         self.ninp = ninp
@@ -73,14 +73,14 @@ def train(model, dataloader, criterion, ntokens, optimizer, scheduler, epoch):
     start_time = time.time()
     i=0
     for batch in dataloader:
-        input = batch['input_ids'].clone()
+        input = batch['input_ids'].permute(1, 0).clone()
         src_mask = model.generate_square_subsequent_mask(batch['input_ids'].size(1))
-        rand_value = torch.rand(batch.input_ids.shape)
+        rand_value = torch.rand(batch.input_ids.permute(1, 0).shape)
         rand_mask = (rand_value < 0.15) * (input != 101) * (input != 102) * (input != 0)
         mask_idx=(rand_mask.flatten() == True).nonzero().view(-1)
         input = input.flatten()
         input[mask_idx] = 103
-        input = input.view(batch['input_ids'].size())
+        input = input.view(batch['input_ids'].permute(1, 0).size())
 
         out = model(input.to(device), src_mask.to(device))
         loss = criterion(out.view(-1, ntokens), batch['input_ids'].view(-1).to(device))
@@ -102,14 +102,14 @@ def evaluate(model: nn.Module, dataloader, ntokens: int, criterion) -> float:
     i=0
     with torch.no_grad():
         for batch in dataloader:
-            input = batch['input_ids'].clone()
+            input = batch['input_ids'].permute(1, 0).clone()
             src_mask = model.generate_square_subsequent_mask(batch['input_ids'].size(1))
-            rand_value = torch.rand(batch.input_ids.shape)
+            rand_value = torch.rand(batch.input_ids.permute(1, 0).shape)
             rand_mask = (rand_value < 0.15) * (input != 101) * (input != 102) * (input != 0)
             mask_idx=(rand_mask.flatten() == True).nonzero().view(-1)
             input = input.flatten()
             input[mask_idx] = 103
-            input = input.view(batch['input_ids'].size())
+            input = input.view(batch['input_ids'].permute(1, 0).size())
 
             out = model(input.to(device), src_mask.to(device))
             loss = criterion(out.view(-1, ntokens), batch['input_ids'].view(-1).to(device))
