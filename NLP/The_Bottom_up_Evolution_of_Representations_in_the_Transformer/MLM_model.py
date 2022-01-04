@@ -73,7 +73,6 @@ def train(model, dataloader, criterion, ntokens, optimizer, scheduler, epoch):
     start_time = time.time()
     i=0
     for batch in dataloader:
-        print(f"{i}-th sample in train mode")
         input = batch['input_ids'].clone()
         src_mask = model.generate_square_subsequent_mask(batch['input_ids'].size(1))
         rand_value = torch.rand(batch.input_ids.shape)
@@ -103,7 +102,6 @@ def evaluate(model: nn.Module, dataloader, ntokens: int, criterion) -> float:
     i=0
     with torch.no_grad():
         for batch in dataloader:
-            print(f"{i}-th sample in evaluate mode")
             input = batch['input_ids'].clone()
             src_mask = model.generate_square_subsequent_mask(batch['input_ids'].size(1))
             rand_value = torch.rand(batch.input_ids.shape)
