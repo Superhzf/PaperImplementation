@@ -67,6 +67,16 @@ class Seq2SeqTransformer(nn.Module):
         self.tgt_tok_emb = nn.Embedding(tgt_vocab_size, emb_size)
         self.positional_encoding = PositionalEncoding(emb_size, dropout=dropout)
 
+        self.init_weights()
+
+    def init_weights(self):
+        initrange = 0.1
+        self.src_tok_emb.weight.data.uniform_(-initrange, initrange)
+        self.tgt_tok_emb.weight.data.uniform_(-initrange, initrange)
+        self.generator.bias.data.zero_()
+        self.generator.weight.data.uniform_(-initrange, initrange)
+
+
     def forward(self,
                 src: Tensor,
                 trg: Tensor,
