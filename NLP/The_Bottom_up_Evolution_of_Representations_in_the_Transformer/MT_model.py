@@ -62,7 +62,7 @@ class Seq2SeqTransformer(nn.Module):
                                      num_decoder_layers=num_decoder_layer,
                                      dim_feedforward=dim_feedforward,
                                      dropout=dropout)
-        self.generator=nn.Linear(emb_size, tgt_vocab_size)
+        self.decoder=nn.Linear(emb_size, tgt_vocab_size)
         self.src_tok_emb = nn.Embedding(src_vocab_size, emb_size)
         self.tgt_tok_emb = nn.Embedding(tgt_vocab_size, emb_size)
         self.positional_encoding = PositionalEncoding(emb_size, dropout=dropout)
@@ -73,9 +73,8 @@ class Seq2SeqTransformer(nn.Module):
         initrange = 0.1
         self.src_tok_emb.weight.data.uniform_(-initrange, initrange)
         self.tgt_tok_emb.weight.data.uniform_(-initrange, initrange)
-        self.generator.bias.data.zero_()
-        self.generator.weight.data.uniform_(-initrange, initrange)
-
+        self.decoder.bias.data.zero_()
+        self.decoder.weight.data.uniform_(-initrange, initrange)
 
     def forward(self,
                 src: Tensor,
@@ -85,11 +84,13 @@ class Seq2SeqTransformer(nn.Module):
                 src_padding_mask:Tensor,
                 tgt_padding_mask:Tensor,
                 memory_key_padding_mask: Tensor):
-        src_emb = self.positional_encoding(self.src_tok_emb(src))
-        tgt_emb = self.positional_encoding(self.tgt_tok_emb(trg))
+        src = self.src_tok_emb(src)
+        trg = self.tgt_tok_emb(trg)
+        src_emb = self.positional_encoding(src)
+        tgt_emb = self.positional_encoding(trg)
         outs = self.transformer(src_emb, tgt_emb, src_mask, tgt_mask, None,
                                 src_padding_mask, tgt_padding_mask, memory_key_padding_mask)
-        return self.generator(outs)
+        return self.decoder(outs)
 
     def encode(self, src: Tensor, src_mask: Tensor):
         # This should be the same as the TransformerEncoderLayer
