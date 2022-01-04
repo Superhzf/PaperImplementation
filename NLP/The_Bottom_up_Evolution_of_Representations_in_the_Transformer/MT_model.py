@@ -41,22 +41,6 @@ class PositionalEncoding(nn.Module):
     def forward(self, token_embedding: Tensor):
         return self.dropout(token_embedding + self.pos_embedding[:token_embedding.size(0), :])
 
-class TokenEmbedding(nn.Module):
-    """
-    The difference between this class and nn.Embedding is that
-    this class times math.sqrt(self.emb_size) to nn.Embedding. It is not clear why I have to do it
-
-    TODO: find out why time math.sqrt(self.emb_size)
-    """
-    def __init__(self, vocab_size:int, emb_size: int):
-        super(TokenEmbedding, self).__init__()
-        self.embedding = nn.Embedding(vocab_size, emb_size)
-        self.emb_size = emb_size
-
-    def forward(self, tokens:Tensor):
-        return self.embedding(tokens.long()) * math.sqrt(self.emb_size)
-
-
 class Seq2SeqTransformer(nn.Module):
     """
     The main model class
@@ -80,8 +64,8 @@ class Seq2SeqTransformer(nn.Module):
                                      dim_feedforward=dim_feedforward,
                                      dropout=dropout)
         self.generator=nn.Linear(emb_size, tgt_vocab_size)
-        self.src_tok_emb = TokenEmbedding(src_vocab_size, emb_size)
-        self.tgt_tok_emb = TokenEmbedding(tgt_vocab_size, emb_size)
+        self.src_tok_emb = nn.Embedding(src_vocab_size, emb_size)
+        self.tgt_tok_emb = nn.Embedding(tgt_vocab_size, emb_size)
         self.positional_encoding = PositionalEncoding(emb_size, dropout=dropout)
 
     def forward(self,
@@ -160,7 +144,7 @@ def train_epoch(model, optimizer, batch_size, collate_fn, loss_fn, train_iter):
 def evaluate(model, batch_size,collate_fn, loss_fn, val_iter):
     model.eval()
     losses = 0
-    
+
     val_dataloader = DataLoader(val_iter, batch_size=batch_size, collate_fn=collate_fn)
 
     for src, tgt in val_dataloader:

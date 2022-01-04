@@ -1,7 +1,7 @@
 # credits go to
 # https://pytorch.org/tutorials/beginner/translation_transformer.html
 from timeit import default_timer as timer
-from MT_model import PositionalEncoding, TokenEmbedding, Seq2SeqTransformer, train_epoch,evaluate, SRC_LANGUAGE, TGT_LANGUAGE
+from MT_model import PositionalEncoding, Seq2SeqTransformer, train_epoch,evaluate, SRC_LANGUAGE, TGT_LANGUAGE
 from MT_model import special_symbols
 from MT_model import UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX
 from torchtext.vocab import build_vocab_from_iterator
