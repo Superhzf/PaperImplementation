@@ -8,7 +8,8 @@ import time
 import math
 import copy
 from torch.utils.data import DataLoader
-from MLM_model import TransformerModel, train, evaluate
+from MLM_helpers import train, evaluate
+from models import TransformerModel
 import numpy as np
 
 def data_collate_fn_MLM(dataset_samples_list):
