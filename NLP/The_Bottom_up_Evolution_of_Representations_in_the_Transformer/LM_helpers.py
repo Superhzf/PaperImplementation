@@ -12,8 +12,8 @@ import time
 import os
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-# TODO: need more information about bptt
-bptt = 35
+# bptt is actually the intended sequence length
+bptt = 5000
 
 
 def batchify(data: Tensor, bsz: int) -> Tensor:
