@@ -22,7 +22,6 @@ models_folder = './TrainedModels/'
 # set up the the default size
 batch_size = 20
 eval_batch_size = 10
-# In development mode, I use a small dataset for faster iteration.
 corpus = Corpus(path=data_source,development_mode=DEVELOPMENT_MODE)
 
 train_data = batchify(corpus.train, batch_size)
@@ -62,4 +61,4 @@ for epoch in range(1, epochs + 1):
     scheduler.step()
 
 # Export the model in ONNX format.
-export_onnx(f'{models_folder}LM_model.onnx', batch_size=1, seq_len=bptt,model=best_model)
+export_onnx(f'{models_folder}LM_model.onnx', batch_size=batch_size, seq_len=bptt,model=best_model)

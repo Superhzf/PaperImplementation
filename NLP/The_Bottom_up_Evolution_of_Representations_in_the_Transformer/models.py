@@ -2,6 +2,8 @@ import torch
 from torch import nn, Tensor
 import math
 from torch.nn import TransformerEncoder, TransformerEncoderLayer, TransformerDecoder, TransformerDecoderLayer
+import os
+
 """
 Per the paper, we need to set up seeds to make sure different tasks (LM, MLM, MT)
 share the same initialization.
@@ -196,5 +198,5 @@ def export_onnx(path, batch_size, seq_len,model):
           format(os.path.realpath(path)))
     model.eval()
     dummy_input = torch.LongTensor(seq_len * batch_size).zero_().view(-1, batch_size).to(device)
-    dummy_src = generate_square_subsequent_mask(bptt).to(device)
+    dummy_src = generate_square_subsequent_mask(seq_len).to(device)
     torch.onnx.export(model, (dummy_input,dummy_src), path,opset_version=10)

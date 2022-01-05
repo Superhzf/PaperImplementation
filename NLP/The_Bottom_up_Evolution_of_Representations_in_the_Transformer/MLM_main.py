@@ -9,7 +9,7 @@ import math
 import copy
 from torch.utils.data import DataLoader
 from MLM_helpers import train, evaluate
-from models import TransformerModel
+from models import TransformerModel, export_onnx
 import numpy as np
 
 def data_collate_fn_MLM(dataset_samples_list):
@@ -20,8 +20,6 @@ def data_collate_fn_MLM(dataset_samples_list):
 # In development mode, I use a small dataset for faster iteration.
 DEVELOPMENT_MODE = True
 
-# Set the random seed manually for reproducibility.
-torch.manual_seed(1234)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 data_source = "./data/"
@@ -69,3 +67,6 @@ for epoch in range(1, epochs + 1):
         best_val_loss = val_loss
         best_model = copy.deepcopy(model)
     scheduler.step()
+
+# Export the model in ONNX format.
+export_onnx(f'{models_folder}MLM_model.onnx', batch_size=BATCH_SIZE, seq_len=100,model=best_model)
