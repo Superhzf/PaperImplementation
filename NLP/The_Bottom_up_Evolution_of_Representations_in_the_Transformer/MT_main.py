@@ -1,9 +1,10 @@
 # credits go to
 # https://pytorch.org/tutorials/beginner/translation_transformer.html
 from timeit import default_timer as timer
-from MT_model import PositionalEncoding, Seq2SeqTransformer, train_epoch,evaluate, SRC_LANGUAGE, TGT_LANGUAGE
-from MT_model import special_symbols
-from MT_model import UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX
+from MT_helpers import train_epoch,evaluate, SRC_LANGUAGE, TGT_LANGUAGE
+from models import Seq2SeqTransformer
+from MT_helpers import special_symbols
+from MT_helpers import UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX
 from torchtext.vocab import build_vocab_from_iterator
 import torch
 from torchtext.data.utils import get_tokenizer
@@ -91,8 +92,16 @@ NUM_ENCODER_LAYERS = 3
 NUM_DECODER_LAYERS = 3
 NUM_EPOCHS = 18
 BATCH_SIZE = 128
-transformer = Seq2SeqTransformer(NUM_ENCODER_LAYERS, NUM_DECODER_LAYERS, EMB_SIZE,
-                                 NHEAD, SRC_VOCAB_SIZE, TGT_VOCAB_SIZE, FFN_HID_DIM)
+DROPOUT = 0.5
+
+transformer = Seq2SeqTransformer(src_vocab_size=SRC_VOCAB_SIZE,
+                                 d_model=EMB_SIZE,
+                                 nhead=NHEAD,
+                                 dim_feedforward=FFN_HID_DIM,
+                                 num_encoder_layer=NUM_ENCODER_LAYERS,
+                                 dropout=DROPOUT,
+                                 num_decoder_layer=NUM_DECODER_LAYERS,
+                                 tgt_vocab_size=TGT_VOCAB_SIZE)
 
 for p in transformer.parameters():
     if p.dim() > 1:
