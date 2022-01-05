@@ -7,7 +7,6 @@ from MT_model import UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX
 from torchtext.vocab import build_vocab_from_iterator
 import torch
 from torchtext.data.utils import get_tokenizer
-from torchtext.datasets import Multi30k
 from typing import Iterable, List
 import torch.nn as nn
 from torch.nn.utils.rnn import pad_sequence
