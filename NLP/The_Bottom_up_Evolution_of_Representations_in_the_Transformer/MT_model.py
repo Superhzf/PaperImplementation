@@ -37,7 +37,8 @@ class PositionalEncoding(nn.Module):
         self.register_buffer('pos_embedding', pos_embedding)
 
     def forward(self, token_embedding: Tensor):
-        return self.dropout(token_embedding + self.pos_embedding[:token_embedding.size(0), :])
+        token_embedding = token_embedding + self.pos_embedding[:token_embedding.size(0), :]
+        return self.dropout(token_embedding)
 
 class Seq2SeqTransformer(nn.Module):
     """

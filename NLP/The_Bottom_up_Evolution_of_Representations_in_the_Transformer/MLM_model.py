@@ -14,6 +14,13 @@ import time
 import os
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+def generate_square_subsequent_mask(sz):
+    mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
+    mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
+    return mask
+
+
 class PositionalEncoding(nn.Module):
 
     def __init__(self, d_model, dropout=0.1, max_len=5000):
@@ -45,11 +52,6 @@ class TransformerModel(nn.Module):
 
         self.init_weights()
 
-    def generate_square_subsequent_mask(self, sz):
-        mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
-        mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
-        return mask
-
     def init_weights(self):
         initrange = 0.1
         self.encoder.weight.data.uniform_(-initrange, initrange)
@@ -72,7 +74,7 @@ def train(model, dataloader, criterion, ntokens, optimizer, scheduler, epoch):
     i=0
     for batch in dataloader:
         input = batch['input_ids'].permute(1, 0).clone()
-        src_mask = model.generate_square_subsequent_mask(batch['input_ids'].size(1))
+        src_mask = generate_square_subsequent_mask(batch['input_ids'].size(1))
         rand_value = torch.rand(batch.input_ids.permute(1, 0).shape)
         rand_mask = (rand_value < 0.15) * (input != 101) * (input != 102) * (input != 0)
         mask_idx=(rand_mask.flatten() == True).nonzero().view(-1)
@@ -101,7 +103,7 @@ def evaluate(model: nn.Module, dataloader, ntokens: int, criterion) -> float:
     with torch.no_grad():
         for batch in dataloader:
             input = batch['input_ids'].permute(1, 0).clone()
-            src_mask = model.generate_square_subsequent_mask(batch['input_ids'].size(1))
+            src_mask = generate_square_subsequent_mask(batch['input_ids'].size(1))
             rand_value = torch.rand(batch.input_ids.permute(1, 0).shape)
             rand_mask = (rand_value < 0.15) * (input != 101) * (input != 102) * (input != 0)
             mask_idx=(rand_mask.flatten() == True).nonzero().view(-1)
