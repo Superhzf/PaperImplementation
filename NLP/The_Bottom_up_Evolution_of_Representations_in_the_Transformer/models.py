@@ -2,6 +2,13 @@ import torch
 from torch import nn, Tensor
 import math
 from torch.nn import TransformerEncoder, TransformerEncoderLayer, TransformerDecoder, TransformerDecoderLayer
+"""
+Per the paper, we need to set up seeds to make sure different tasks (LM, MLM, MT)
+share the same initialization.
+"""
+seed_src_tok_emb =  1234
+seed_decoder = 5678
+seed_tgt_tok_emb = 4321
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -58,7 +65,7 @@ class PositionalEncoding(nn.Module):
 
 class TransformerModel(nn.Module):
     """
-    The main model class
+    The main model class for LM and MLM tasks.
     -----------------------------------
     Parameters:
     src_vocab_size: int
@@ -95,8 +102,10 @@ class TransformerModel(nn.Module):
 
     def init_weights(self) -> None:
         initrange = 0.1
+        torch.manual_seed(seed_src_tok_emb)
         self.src_tok_emb.weight.data.uniform_(-initrange, initrange)
         self.decoder.bias.data.zero_()
+        torch.manual_seed(seed_decoder)
         self.decoder.weight.data.uniform_(-initrange, initrange)
 
     def forward(self, src: Tensor, src_mask: Tensor)->Tensor:
@@ -109,7 +118,8 @@ class TransformerModel(nn.Module):
 
 class Seq2SeqTransformer(TransformerModel):
     """
-    The main model class.
+    The main model class for the MT task.
+
     self.transformer_encoder and self.transformer_decoder can be merged into
     a single torch.nn.modules.transformer class. I separate them into two
     different classes because MLM and LM tasks only use self.transformer_encoder;
@@ -149,9 +159,12 @@ class Seq2SeqTransformer(TransformerModel):
 
     def init_weights(self):
         initrange = 0.1
+        torch.manual_seed(seed_src_tok_emb)
         self.src_tok_emb.weight.data.uniform_(-initrange, initrange)
+        torch.manual_seed(seed_tgt_tok_emb)
         self.tgt_tok_emb.weight.data.uniform_(-initrange, initrange)
         self.decoder.bias.data.zero_()
+        torch.manual_seed(seed_decoder)
         self.decoder.weight.data.uniform_(-initrange, initrange)
 
     def forward(self,
