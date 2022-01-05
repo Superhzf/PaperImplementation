@@ -14,7 +14,7 @@ import numpy as np
 
 def data_collate_fn_MLM(dataset_samples_list):
     arr = np.array(dataset_samples_list)
-    inputs = tokenizer(text=arr.tolist(), padding='max_length', max_length=5000, return_tensors='pt')
+    inputs = tokenizer(text=arr.tolist(), padding='max_length', max_length=100, return_tensors='pt')
     return inputs
 
 # In development mode, I use a small dataset for faster iteration.
