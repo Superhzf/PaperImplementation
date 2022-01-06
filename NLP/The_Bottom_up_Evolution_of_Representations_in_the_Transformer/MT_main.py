@@ -93,10 +93,6 @@ model = Seq2SeqTransformer(src_vocab_size=SRC_VOCAB_SIZE,
                                  num_decoder_layer=NLAYERS,
                                  tgt_vocab_size=TGT_VOCAB_SIZE)
 
-for p in transformer.parameters():
-    if p.dim() > 1:
-        nn.init.xavier_uniform_(p)
-
 model = model.to(DEVICE)
 loss_fn = LOSS_FN(ignore_index=PAD_IDX)
 optimizer = ScheduledOptim(model.parameters())
