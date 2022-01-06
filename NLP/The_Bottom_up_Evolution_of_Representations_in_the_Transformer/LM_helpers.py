@@ -47,10 +47,10 @@ def get_batch(source: Tensor, i: int) -> Tuple[Tensor, Tensor]:
     target = source[i+1:i+1+seq_len].view(-1)
     return data, target
 
-def train(model: nn.Module, train_data, criterion, ntokens, optimizer,scheduler,epoch) -> None:
+def train(model: nn.Module, train_data, criterion, ntokens, optimizer,epoch) -> None:
     model.train()  # turn on train mode
     total_loss = 0.
-    log_interval = 200
+    log_interval = 100
     start_time = time.time()
     src_mask = generate_square_subsequent_mask(bptt).to(device)
 
@@ -65,12 +65,12 @@ def train(model: nn.Module, train_data, criterion, ntokens, optimizer,scheduler,
 
         optimizer.zero_grad()
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
-        optimizer.step()
-
+        # torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
+        optimizer.step_and_update_lr()
+        print(f"This is the {batch}th batch")
         total_loss += loss.item()
         if batch % log_interval == 0 and batch > 0:
-            lr = scheduler.get_last_lr()[0]
+            lr = optimizer._optimizer.param_groups[0]['lr']
             ms_per_batch = (time.time() - start_time) * 1000 / log_interval
             cur_loss = total_loss / log_interval
             ppl = math.exp(cur_loss)
