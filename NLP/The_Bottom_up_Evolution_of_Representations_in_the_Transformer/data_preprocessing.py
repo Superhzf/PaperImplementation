@@ -101,7 +101,7 @@ class CorpusMLM:
             src = f.readlines()
         f.close()
         if development_mode:
-            src_len = 20
+            src_len = 120
             src = src[:src_len]
         this_dataset = DatasetMLM(src,self.tokenizer)
         return this_dataset

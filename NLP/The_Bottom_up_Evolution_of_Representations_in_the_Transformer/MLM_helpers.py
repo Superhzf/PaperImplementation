@@ -12,7 +12,7 @@ import os
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-def train(model, dataloader, criterion, ntokens, optimizer, scheduler, epoch):
+def train(model, dataloader, criterion, ntokens, optimizer, epoch):
     model.train()
     total_loss = 0
     log_interval = 200
@@ -34,8 +34,7 @@ def train(model, dataloader, criterion, ntokens, optimizer, scheduler, epoch):
 
         optimizer.zero_grad()
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
-        optimizer.step()
+        optimizer.step_and_update_lr()
 
         total_loss += loss.item()
         i+=1
@@ -62,4 +61,4 @@ def evaluate(model: nn.Module, dataloader, ntokens: int, criterion) -> float:
 
             total_loss += loss.item()
             i+=1
-    return total_loss / (len(dataloader) - 1)
+    return total_loss / len(dataloader)
