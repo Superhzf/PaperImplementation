@@ -1,4 +1,4 @@
-# ref:
+# Modified from:
 # https://www.kaggle.com/mojammel/masked-language-model-with-pytorch-transformer
 # https://towardsdatascience.com/masked-language-modelling-with-bert-7d49793e5d2c
 from data_preprocessing import CorpusMLM

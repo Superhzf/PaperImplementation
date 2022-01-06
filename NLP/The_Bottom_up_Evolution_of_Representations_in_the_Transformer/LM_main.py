@@ -1,4 +1,4 @@
-# credits go to:
+# Modified from:
 # https://github.com/pytorch/examples/tree/master/word_language_model
 # https://pytorch.org/tutorials/beginner/transformer_tutorial.html
 from LM_helpers import batchify, train, bptt, evaluate

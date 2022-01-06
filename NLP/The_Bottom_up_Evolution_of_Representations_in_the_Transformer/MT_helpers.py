@@ -1,7 +1,6 @@
 from torch import Tensor
 import torch
 import torch.nn as nn
-# from torch.nn import TransformerEncoderLayer, TransformerEncoder, TransformerDecoderLayer, TransformerDecoder
 import math
 from torch.utils.data import DataLoader
 from models import generate_square_subsequent_mask
@@ -60,7 +59,7 @@ def train_epoch(model, optimizer, batch_size, collate_fn, loss_fn, train_iter):
         loss = loss_fn(logits.reshape(-1, logits.shape[-1]), tgt_out.reshape(-1))
         loss.backward()
 
-        optimizer.step()
+        optimizer.step_and_update_lr()
         losses += loss.item()
 
     return losses / len(train_dataloader)

@@ -1,10 +1,11 @@
-# credits go to
+# Modified from
 # https://pytorch.org/tutorials/beginner/translation_transformer.html
 from timeit import default_timer as timer
 from MT_helpers import train_epoch,evaluate, SRC_LANGUAGE, TGT_LANGUAGE
-from models import Seq2SeqTransformer
 from MT_helpers import special_symbols
 from MT_helpers import UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX
+from models import Seq2SeqTransformer, export_onnx, LOSS_FN, ScheduledOptim
+from models import D_MODEL, FFN_HID_DIM, NLAYERS, NHEAD, DROPOUT, EPOCHS, BATCH_SIZE
 from torchtext.vocab import build_vocab_from_iterator
 import torch
 from torchtext.data.utils import get_tokenizer
@@ -49,15 +50,12 @@ def tensor_transform(token_ids:List[str]):
                       torch.tensor(token_ids),
                       torch.tensor([EOS_IDX])))
 
-torch.manual_seed(0)
-
 data_source = "./data/"
 models_folder = './TrainedModels/'
 # In development mode, I use a small dataset for faster iteration.
 DEVELOPMENT_MODE = True
 corpus = CorpusMT(data_source, development_mode=DEVELOPMENT_MODE)
 train_iter = corpus.train
-val_iter = corpus.val
 
 token_transform = {}
 vocab_transform = {}
@@ -85,33 +83,23 @@ for ln in [SRC_LANGUAGE, TGT_LANGUAGE]:
 
 SRC_VOCAB_SIZE = len(vocab_transform[SRC_LANGUAGE])
 TGT_VOCAB_SIZE = len(vocab_transform[TGT_LANGUAGE])
-EMB_SIZE = 512
-NHEAD = 8
-FFN_HID_DIM = 512
-NUM_ENCODER_LAYERS = 3
-NUM_DECODER_LAYERS = 3
-NUM_EPOCHS = 18
-BATCH_SIZE = 128
-DROPOUT = 0.5
 
-transformer = Seq2SeqTransformer(src_vocab_size=SRC_VOCAB_SIZE,
-                                 d_model=EMB_SIZE,
+model = Seq2SeqTransformer(src_vocab_size=SRC_VOCAB_SIZE,
+                                 d_model=D_MODEL,
                                  nhead=NHEAD,
                                  dim_feedforward=FFN_HID_DIM,
-                                 num_encoder_layer=NUM_ENCODER_LAYERS,
+                                 num_encoder_layer=NLAYERS,
                                  dropout=DROPOUT,
-                                 num_decoder_layer=NUM_DECODER_LAYERS,
+                                 num_decoder_layer=NLAYERS,
                                  tgt_vocab_size=TGT_VOCAB_SIZE)
 
 for p in transformer.parameters():
     if p.dim() > 1:
         nn.init.xavier_uniform_(p)
 
-transformer = transformer.to(DEVICE)
-
-loss_fn = torch.nn.CrossEntropyLoss(ignore_index=PAD_IDX)
-
-optimizer = torch.optim.Adam(transformer.parameters(), lr=0.0001, betas=(0.9, 0.98), eps=1e-9)
+model = model.to(DEVICE)
+loss_fn = LOSS_FN(ignore_index=PAD_IDX)
+optimizer = ScheduledOptim(model.parameters())
 
 # This is required by collate_fn
 text_transform = {}
@@ -120,9 +108,12 @@ for ln in [SRC_LANGUAGE, TGT_LANGUAGE]:
                                              vocab_transform[ln],
                                              tensor_transform)
 
-for epoch in range(1, NUM_EPOCHS+1):
+for epoch in range(1, EPOCHS+1):
     start_time = timer()
-    train_loss = train_epoch(transformer, optimizer, BATCH_SIZE, collate_fn, loss_fn, train_iter)
+    train_loss = train_epoch(model, optimizer, BATCH_SIZE, collate_fn, loss_fn, train_iter)
     end_time = timer()
-    val_loss = evaluate(transformer,BATCH_SIZE,collate_fn, loss_fn, val_iter)
-    print((f"Epoch: {epoch}, Train loss: {train_loss:.3f}, Val loss: {val_loss:.3f}, "f"Epoch time = {(end_time - start_time):.3f}s"))
+    train_loss = evaluate(model,BATCH_SIZE,collate_fn, loss_fn, train_iter)
+    print((f"Epoch: {epoch}, Train loss: {train_loss:.3f}, "f"Epoch time = {(end_time - start_time):.3f}s"))
+
+# Export the model in ONNX format.
+export_onnx(f'{models_folder}MT_model.onnx', batch_size=BATCH_SIZE, seq_len=1,model=model)
