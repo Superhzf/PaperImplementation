@@ -3,7 +3,6 @@ from torch import nn, Tensor
 import math
 from torch.nn import TransformerEncoder, TransformerEncoderLayer, TransformerDecoder, TransformerDecoderLayer
 import os
-
 """
 Per the paper, we need to set up seeds to make sure different tasks (LM, MLM, MT)
 share the same initialization.
@@ -11,6 +10,30 @@ share the same initialization.
 seed_src_tok_emb =  1234
 seed_decoder = 5678
 seed_tgt_tok_emb = 4321
+
+"""
+Similarly, we need to set up the same parameters for
+different tasks (LM, MLM, MT). The values come from the paper
+Attention Is All You Need.
+"""
+D_MODEL = 512
+FFN_HID_DIM = 2048
+NLAYERS = 6
+NHEAD = 8
+DROPOUT = 0.1
+# TOOD: the current value is for development, change EPOCHS=10 and BATCH_SIZE=2048
+EPOCHS = 1
+BATCH_SIZE = 100
+# TOOD: the current value is for development, change EPOCHS=10 and BATCH_SIZE=2048
+N_WARMUP_STEPS = 4000
+BETAS = (0.9, 0.98)
+EPS = 1e-9
+"""
+We also need to set up the same criterion, learning rate, and optimizer for
+different tasks (LM, MLM, MT). Optimizer and learning rate are set up below
+in the ScheduledOptim class.
+"""
+LOSS_FN = nn.CrossEntropyLoss
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -120,7 +143,9 @@ class TransformerModel(nn.Module):
 
 class Seq2SeqTransformer(TransformerModel):
     """
-    The main model class for the MT task.
+    The main model class for the MT task. I make it inherit from the
+    TransformerModel class to make sure they share the same architecture regarding
+    the encoder part.
 
     self.transformer_encoder and self.transformer_decoder can be merged into
     a single torch.nn.modules.transformer class. I separate them into two
@@ -200,3 +225,48 @@ def export_onnx(path, batch_size, seq_len,model):
     dummy_input = torch.LongTensor(seq_len * batch_size).zero_().view(-1, batch_size).to(device)
     dummy_src = generate_square_subsequent_mask(seq_len).to(device)
     torch.onnx.export(model, (dummy_input,dummy_src), path,opset_version=10)
+
+
+class ScheduledOptim():
+    '''
+    The same optimizer and learning rate for different tasks (LM, MLM, and MT).
+
+    Modified from:
+    https://github.com/jadore801120/attention-is-all-you-need-pytorch/blob/master/transformer/Optim.py
+
+    The idea is from the paper Attention Is All You Need.
+    '''
+
+    def __init__(self, model_parameters):
+        self._optimizer = torch.optim.Adam(model_parameters, betas=BETAS, eps=EPS)
+        self.lr_mul = 1
+        self.d_model = D_MODEL
+        self.n_warmup_steps = N_WARMUP_STEPS
+        self.n_steps = 0
+
+
+    def step_and_update_lr(self):
+        "Step with the inner optimizer"
+        self._update_learning_rate()
+        self._optimizer.step()
+
+
+    def zero_grad(self):
+        "Zero out the gradients with the inner optimizer"
+        self._optimizer.zero_grad()
+
+
+    def _get_lr_scale(self):
+        d_model = self.d_model
+        n_steps, n_warmup_steps = self.n_steps, self.n_warmup_steps
+        return (d_model ** -0.5) * min(n_steps ** (-0.5), n_steps * n_warmup_steps ** (-1.5))
+
+
+    def _update_learning_rate(self):
+        ''' Learning rate scheduling per step '''
+
+        self.n_steps += 1
+        lr = self.lr_mul * self._get_lr_scale()
+
+        for param_group in self._optimizer.param_groups:
+            param_group['lr'] = lr

@@ -112,4 +112,4 @@ for epoch in range(1, EPOCHS+1):
     print((f"Epoch: {epoch}, Train loss: {train_loss:.3f}, "f"Epoch time = {(end_time - start_time):.3f}s"))
 
 # Export the model in ONNX format.
-export_onnx(f'{models_folder}MT_model.onnx', batch_size=BATCH_SIZE, seq_len=1,model=model)
+# export_onnx(f'{models_folder}MT_model.onnx', batch_size=BATCH_SIZE, seq_len=1,model=model)
