@@ -1,3 +1,7 @@
+"""
+Modified from
+https://github.com/jadore801120/attention-is-all-you-need-pytorch/blob/master/preprocess.py
+"""
 import sys
 import os
 from tqdm import tqdm
