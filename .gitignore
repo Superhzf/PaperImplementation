@@ -131,4 +131,5 @@ dmypy.json
 .DS_Store
 .data
 *.ipynb
-data*
+data
+data2
