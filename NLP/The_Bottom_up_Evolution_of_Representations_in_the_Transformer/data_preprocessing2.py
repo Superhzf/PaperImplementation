@@ -27,7 +27,8 @@ _TRAIN_DATA_SOURCES = [
     ]
 SAVE_DATA_SRC = "bpe_vocab_src.pkl"
 SAVE_DATA_TRG = "bpe_vocab_trg.pkl"
-SAVE_DATA_TRAIN = "bpe_translate_train.pkl"
+SAVE_DATA_MT_TRAIN = "bpe_MT_train.pkl"
+SAVE_DATA_LM_TRAIN = "bpe_LM_train.pkl"
 """
 Settings for BPE
 """
@@ -147,22 +148,30 @@ def main():
     fields = (field_src, field_trg)
 
     enc_train_files_prefix = PREFIX_NC + '-train'
-    train = TranslationDataset(
+    train_MT = TranslationDataset(
         fields=fields,
         path=os.path.join(DATA_DIR, enc_train_files_prefix),
         exts=('.src','.trg'),
         filter_pred=filter_examples_with_length)
+
+    enc_train_files_LM = enc_train_files_prefix+'.src'
+    train_LM = LanguageModelingDataset(
+        path=os.path.join(data_dir, enc_train_files_LM),
+        text_field=field_src,
+        newline_eos=True)
 
     field_src.build_vocab(train.src, min_freq=2)
     field_trg.build_vocab(train.trg, min_freq=2)
 
     save_data_src = os.path.join(DATA_DIR, SAVE_DATA_SRC)
     save_data_trg = os.path.join(DATA_DIR, SAVE_DATA_TRG)
-    save_data_train = os.path.join(DATA_DIR, SAVE_DATA_TRAIN)
+    save_data_MT_train = os.path.join(DATA_DIR, SAVE_DATA_MT_TRAIN)
+    save_data_LM_train = os.path.join(DATA_DIR, SAVE_DATA_LM_TRAIN)
 
     pickle.dump(field_src, open(save_data_src, 'wb'))
     pickle.dump(field_trg, open(save_data_trg, 'wb'))
-    pickle.dump(train.examples, open(save_data_train, 'wb'))
+    pickle.dump(train_MT.examples, open(save_data_MT_train, 'wb'))
+    pickle.dump(train_LM.examples, open(save_data_LM_train, 'wb'))
 
 if __name__ == '__main__':
     mkdir_if_needed(DATA_DIR)
