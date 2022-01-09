@@ -21,8 +21,8 @@ PREFIX_NC = "nc"
 _TRAIN_DATA_SOURCES = [
     {
      "folder_name":"training",
-     "trg": "news-commentary-v12.de-en.en",
-     "src": "news-commentary-v12.de-en.de"
+     "src": "news-commentary-v12.de-en.en",
+     "trg": "news-commentary-v12.de-en.de"
      },
     ]
 SAVE_DATA_SRC = "bpe_vocab_src.pkl"
