@@ -206,10 +206,10 @@ class Seq2SeqTransformer(TransformerModel):
         trg = self.tgt_tok_emb(trg)*math.sqrt(self.d_model)
         src_emb = self.pos_encoder(src)
         tgt_emb = self.pos_encoder(trg)
-        memory = self.transformer_encoder(src,
+        memory = self.transformer_encoder(src_emb,
                                           mask=src_mask,
                                           src_key_padding_mask=src_padding_mask)
-        output = self.transformer_decoder(trg,
+        output = self.transformer_decoder(tgt_emb,
                                           memory,
                                           tgt_mask=tgt_mask,
                                           memory_mask=None,
