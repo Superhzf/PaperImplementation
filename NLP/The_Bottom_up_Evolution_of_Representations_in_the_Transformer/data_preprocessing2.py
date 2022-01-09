@@ -9,7 +9,7 @@ from learn_bpe import learn_bpe
 from apply_bpe import BPE
 import codecs
 from torchtext.legacy import data
-from torchtext.legacy.datasets import TranslationDataset
+from torchtext.legacy.datasets import TranslationDataset, LanguageModelingDataset
 from itertools import chain
 import pickle
 
@@ -156,12 +156,12 @@ def main():
 
     enc_train_files_LM = enc_train_files_prefix+'.src'
     train_LM = LanguageModelingDataset(
-        path=os.path.join(data_dir, enc_train_files_LM),
+        path=os.path.join(DATA_DIR, enc_train_files_LM),
         text_field=field_src,
         newline_eos=True)
 
-    field_src.build_vocab(train.src, min_freq=2)
-    field_trg.build_vocab(train.trg, min_freq=2)
+    field_src.build_vocab(train_MT.src, min_freq=2)
+    field_trg.build_vocab(train_MT.trg, min_freq=2)
 
     save_data_src = os.path.join(DATA_DIR, SAVE_DATA_SRC)
     save_data_trg = os.path.join(DATA_DIR, SAVE_DATA_TRG)
