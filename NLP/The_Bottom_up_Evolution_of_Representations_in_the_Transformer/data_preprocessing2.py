@@ -160,6 +160,9 @@ def main():
     save_data_trg = os.path.join(DATA_DIR, SAVE_DATA_TRG)
     save_data_train = os.path.join(DATA_DIR, SAVE_DATA_TRAIN)
 
+    pickle.dump(field_src, open(save_data_src, 'wb'))
+    pickle.dump(field_trg, open(save_data_trg, 'wb'))
+    pickle.dump(train.examples, open(save_data_train, 'wb'))
 
 if __name__ == '__main__':
     mkdir_if_needed(DATA_DIR)
