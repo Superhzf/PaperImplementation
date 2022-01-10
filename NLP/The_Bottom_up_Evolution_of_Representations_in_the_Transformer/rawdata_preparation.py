@@ -1,85 +1,55 @@
-# ref: https://www.statmt.org/wmt17/translation-task.html#download
+from datasets import load_dataset
 import os
-import re
-import string
-data_source = "./data/"
-def remove_special_characters(text):
-    # define the pattern to keep
-    pat = r'[^a-zA-z0-9.,!?/:;\"\'\s]'
-    return re.sub(pat, ' ', text)
-def remove_punctuation(text):
-    text = ''.join([c for c in text if c not in string.punctuation])
-    return text
-def remove_numbers(text):
-    # define the pattern to keep
-    pattern = r'[^a-zA-z.,!?/:;\"\'\s]'
-    return re.sub(pattern, '', text)
-def remove_redundant_space(text):
-    return " ".join(text.split())
-def read_file(folder_name,file_name,file_type):
-    lines=[]
-    with open("{}/{}".format(folder_name,file_name)) as file:
-        print("reading {}".format(file_name))
-        for line in file:
-            # Not clear what preprocessing steps are used, need confirmation from the authors.
-#             line = remove_special_characters(line)
-#             line = remove_punctuation(line)
-#             line = line.strip()
-#             line = remove_redundant_space(line)
-            if line != "":
-                lines.append(line.lower())
-            else:
-                "{} in {} is skipped!".format(line, file_name)
-    return lines
+import sys
 
-def flat_data(nested_dataset):
-    flat_dataset=[]
-    for sublist in nested_dataset:
-        for item in sublist:
-            flat_dataset.append(item)
-    return flat_dataset
+DATA_FOLDER = './data/'
+VALID_EN = 'valid_en.txt'
+VALID_DE = 'valid_de.txt'
+TRAIN_EN_FULL = 'train_en_full.txt'
+TRAIN_DE_FULL = 'train_de_full.txt'
+TRAIN_EN_DEV = 'train_en_dev.txt'
+TRAIN_DE_DEV = 'train_de_dev.txt'
 
-def write2file(dataset,data_source,file_name):
-    with open('{}{}'.format(data_source,file_name), 'w') as file:
-        for sentence in dataset:
-            file.write(sentence)
-    file.close()
+
+def write2file(data_folder, dataset, src_file_name, trg_file_name, generate_data_dev_mode=False):
+    """
+    The function to write src and trg sentences into separate files.
+    ----------------------------------------------------
+    Parameter:
+    data_folder: str
+        Where you want to store the saved dataset
+    dataset: datasets.arrow_dataset.Dataset
+        The dataset from huggingface that includes both the src and the trg data
+    src_file_name: str
+        The file name of the source language.
+    trg_file_name: str
+        The file name of the target language.
+    generate_data_dev_mode: bool
+        If true, only the first 5000 sentences will be written into text files.
+    """
+    with open(os.path.join(data_folder, src_file_name), 'w') as src_outf,\
+    open(os.path.join(data_folder, trg_file_name), 'w') as trg_outf:
+        for index, this_sample in enumerate(dataset.data[0]):
+            src_outf.write(this_sample['en'].as_py())
+            src_outf.write('\n')
+            trg_outf.write(this_sample['de'].as_py())
+            trg_outf.write('\n')
+            if generate_data_dev_mode and index>=5000:
+                break;
+    src_outf.close()
+    trg_outf.close()
+    sys.stderr.write(f"{index+1} sentences have been written to {os.path.join(data_folder, src_file_name)}\
+     and {os.path.join(data_folder, trg_file_name)}")
+    sys.stderr.write('\n')
+
+
+def main():
+    # https://huggingface.co/docs/datasets/package_reference/loading_methods.html#datasets.load_dataset
+    # It may take about 20 mins to download the dataset for the first time.
+    dataset = load_dataset(path='wmt17',name="de-en",split=['train','validation'])
+    write2file(DATA_FOLDER, dataset[1], VALID_EN, VALID_DE)
+    write2file(DATA_FOLDER, dataset[0], TRAIN_EN_FULL, TRAIN_DE_FULL)
+    write2file(DATA_FOLDER, dataset[0], TRAIN_EN_DEV, TRAIN_DE_DEV, True)
 
 if __name__ == '__main__':
-    nested_en_dataset = []
-    nested_de_dataset = []
-    for this_folder in [x[0] for x in os.walk(data_source)]:
-        lines_en = []
-        lines_de = []
-        for file in os.listdir(this_folder):
-            if file.endswith("de-en.en"):
-                lines_en = read_file(this_folder,file,"de-en.en")
-                nested_en_dataset.append(lines_en)
-                print("Finished reading {} sentences from {}".format(len(lines_en),file))
-            elif file.endswith("de-en.de"):
-                lines_de = read_file(this_folder,file,"de-en.de")
-                nested_de_dataset.append(lines_de)
-                print("Finished reading {} sentences from {}".format(len(lines_de),file))
-
-
-    flat_en_dataset = flat_data(nested_en_dataset)
-    flat_de_dataset = flat_data(nested_de_dataset)
-    # TODO: need clarification from the authors about validation set size.
-    train_size = int(len(flat_en_dataset)*0.9)
-    flat_en_trn = flat_en_dataset[:train_size]
-    file_name_trn = "preprocessed_en_trn.txt"
-    flat_en_val = flat_en_dataset[train_size:]
-    file_name_val = "preprocessed_en_val.txt"
-    write2file(flat_en_trn, data_source, file_name_trn)
-    print(f"Finished writing {len(flat_en_trn)} English sentences into {file_name_trn}")
-    write2file(flat_en_val, data_source, file_name_val)
-    print(f"Finished writing {len(flat_en_val)} English sentences into {file_name_val}")
-    # Write German sentences to files
-    flat_de_trn = flat_de_dataset[:train_size]
-    file_name_trn = "preprocessed_de_trn.txt"
-    flat_de_val = flat_de_dataset[train_size:]
-    file_name_val = "preprocessed_de_val.txt"
-    write2file(flat_de_trn, data_source, file_name_trn)
-    print(f"Finished writing {len(flat_de_trn)} German sentences into {file_name_trn}")
-    write2file(flat_en_val, data_source, file_name_val)
-    print(f"Finished writing {len(flat_de_val)} German sentences into {file_name_val}")
+    main()
