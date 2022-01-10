@@ -1,8 +1,9 @@
 from datasets import load_dataset
 import os
 import sys
+from data_preprocessing2 import mkdir_if_needed
 
-DATA_FOLDER = './data/'
+DATA_FOLDER = './data/raw'
 VALID_EN = 'valid_en.txt'
 VALID_DE = 'valid_de.txt'
 TRAIN_EN_FULL = 'train_en_full.txt'
@@ -52,4 +53,5 @@ def main():
     write2file(DATA_FOLDER, dataset[0], TRAIN_EN_DEV, TRAIN_DE_DEV, True)
 
 if __name__ == '__main__':
+    mkdir_if_needed(DATA_FOLDER)
     main()

@@ -16,15 +16,15 @@ import pickle
 """
 Settings for the preprocessing
 """
-RAW_DIR = './data2/'
-PREFIX_NC = "nc"
-_TRAIN_DATA_SOURCES = [
-    {
-     "folder_name":"training",
-     "src": "news-commentary-v12.de-en.en",
-     "trg": "news-commentary-v12.de-en.de"
-     },
-    ]
+RAW_DIR = './data/'
+PREFIX_DEV = "dev"
+PREFIX_FULL = "dev"
+_TRAIN_DATA_SOURCES_DEV ={"folder_name":"raw",
+                          "src": "train_en_dev.txt",
+                          "trg": "train_de_dev.txt"}
+_TRAIN_DATA_SOURCES_FULL ={"folder_name":"raw",
+                           "src": "train_en_full.txt",
+                           "trg": "train_de_full.txt"}
 SAVE_DATA_SRC = "bpe_vocab_src.pkl"
 SAVE_DATA_TRG = "bpe_vocab_trg.pkl"
 SAVE_DATA_MT_TRAIN = "bpe_MT_train.pkl"
@@ -32,7 +32,8 @@ SAVE_DATA_LM_TRAIN = "bpe_LM_train.pkl"
 """
 Settings for BPE
 """
-DATA_DIR = './data2/bpe/'
+DATA_DIR_DEV = './data/bpe_dev/'
+DATA_DIR_FULL = './data/bpe_full/'
 CODES = "codes.txt"
 # symbols is the vocabulary size
 SYMBOLS = 32000
@@ -64,39 +65,11 @@ def extract(raw_dir, folder_name, src_filename, trg_filename):
 
 
 def get_raw_files(raw_dir, sources):
-    raw_files = { "src": [], "trg": [], }
-    for d in sources:
-        src_file, trg_file = extract(raw_dir, d['folder_name'], d["src"], d["trg"])
-        raw_files["src"].append(src_file)
-        raw_files["trg"].append(trg_file)
+    raw_files = {}
+    src_file, trg_file = extract(raw_dir, sources['folder_name'], sources["src"], sources["trg"])
+    raw_files["src"]=(src_file)
+    raw_files["trg"]=(trg_file)
     return raw_files
-
-
-def compile_files(raw_dir, raw_files, prefix):
-    src_fpath = os.path.join(raw_dir, f"raw-{prefix}-src.txt")
-    trg_fpath = os.path.join(raw_dir, f"raw-{prefix}-tgt.txt")
-
-    if os.path.isfile(src_fpath) and os.path.isfile(trg_fpath):
-        sys.stderr.write(f"Merged files found, skip the merging process.\n")
-        return src_fpath, trg_fpath
-
-    sys.stderr.write(f"Merge files into two files: {src_fpath} and {trg_fpath}.\n")
-
-    with open(src_fpath, 'w') as src_outf, open(trg_fpath, 'w') as trg_outf:
-        for src_inf, trg_inf in zip(raw_files['src'], raw_files['trg']):
-            sys.stderr.write(f'  Input files: \n'\
-                    f'    - SRC: {src_inf}, and\n' \
-                    f'    - TRG: {trg_inf}.\n')
-            with open(src_inf, newline='\n') as src_inf, open(trg_inf, newline='\n') as trg_inf:
-                cntr = 0
-                for i, line in enumerate(src_inf):
-                    cntr += 1
-                    src_outf.write(line.replace('\r', ' ').strip() + '\n')
-                for j, line in enumerate(trg_inf):
-                    cntr -= 1
-                    trg_outf.write(line.replace('\r', ' ').strip() + '\n')
-                assert cntr == 0, 'Number of lines in two files are inconsistent.'
-    return src_fpath, trg_fpath
 
 
 def encode_files(bpe, src_in_file, trg_in_file, data_dir, prefix):
@@ -125,14 +98,24 @@ def filter_examples_with_length(x):
         return len(vars(x)['src']) <= MAX_LEN and len(vars(x)['trg']) <= MAX_LEN
 
 
-def main():
+def main(DEVELOPMENT_MODE):
+    if DEVELOPMENT_MODE:
+        DATA_DIR = DATA_DIR_DEV
+        _TRAIN_DATA_SOURCES = _TRAIN_DATA_SOURCES_DEV
+        PREFIX = PREFIX_DEV
+    else:
+        DATA_DIR = DATA_DIR_FULL
+        _TRAIN_DATA_SOURCES = _TRAIN_DATA_SOURCES_FULL
+        PREFIX = PREFIX_FULL
+
     raw_train = get_raw_files(RAW_DIR, _TRAIN_DATA_SOURCES)
-    train_src, train_trg = compile_files(RAW_DIR, raw_train, PREFIX_NC + '-train')
+    train_src = raw_train['src']
+    train_trg = raw_train['trg']
     codes = os.path.join(DATA_DIR, CODES)
-    learn_bpe(raw_train['src'] + raw_train['trg'], codes, SYMBOLS, MIN_FREQUENCY, True)
+    learn_bpe([raw_train['src'], raw_train['trg']], codes, SYMBOLS, MIN_FREQUENCY, True)
     with codecs.open(codes, encoding='utf-8') as codes:
         bpe = BPE(codes, separator=SEPARATOR)
-    encode_files(bpe, train_src, train_trg, DATA_DIR, PREFIX_NC + '-train')
+    encode_files(bpe, train_src, train_trg, DATA_DIR, PREFIX + '-train')
     field_src = data.Field(
             tokenize=str.split,
             lower=True,
@@ -147,7 +130,7 @@ def main():
             eos_token=EOS_WORD)
     fields = (field_src, field_trg)
 
-    enc_train_files_prefix = PREFIX_NC + '-train'
+    enc_train_files_prefix = PREFIX + '-train'
     train_MT = TranslationDataset(
         fields=fields,
         path=os.path.join(DATA_DIR, enc_train_files_prefix),
@@ -174,5 +157,7 @@ def main():
     pickle.dump(train_LM.examples, open(save_data_LM_train, 'wb'))
 
 if __name__ == '__main__':
-    mkdir_if_needed(DATA_DIR)
-    main()
+    mkdir_if_needed(DATA_DIR_DEV)
+    mkdir_if_needed(DATA_DIR_FULL)
+    DEVELOPMENT_MODE = True
+    main(DEVELOPMENT_MODE)
