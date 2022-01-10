@@ -1,6 +1,8 @@
 """
 Modified from
 https://github.com/jadore801120/attention-is-all-you-need-pytorch/blob/master/preprocess.py
+
+Please be aware that the original file some bugs and it cannot run.
 """
 import sys
 import os
@@ -25,6 +27,9 @@ _TRAIN_DATA_SOURCES_DEV ={"folder_name":"raw",
 _TRAIN_DATA_SOURCES_FULL ={"folder_name":"raw",
                            "src": "train_en_full.txt",
                            "trg": "train_de_full.txt"}
+_VAL_DATA_SOURCES = {"folder_name": "raw",
+                     "src": "valid_en.txt",
+                     "trg": "valid_de.txt"}
 SAVE_DATA_SRC = "bpe_vocab_src.pkl"
 SAVE_DATA_TRG = "bpe_vocab_trg.pkl"
 SAVE_DATA_MT_TRAIN = "bpe_MT_train.pkl"
@@ -109,13 +114,18 @@ def main(DEVELOPMENT_MODE):
         PREFIX = PREFIX_FULL
 
     raw_train = get_raw_files(RAW_DIR, _TRAIN_DATA_SOURCES)
+    raw_val = get_raw_files(RAW_DIR, _VAL_DATA_SOURCES)
     train_src = raw_train['src']
     train_trg = raw_train['trg']
+    val_src = raw_val['src']
+    val_trg = raw_val['trg']
+
     codes = os.path.join(DATA_DIR, CODES)
     learn_bpe([raw_train['src'], raw_train['trg']], codes, SYMBOLS, MIN_FREQUENCY, True)
     with codecs.open(codes, encoding='utf-8') as codes:
         bpe = BPE(codes, separator=SEPARATOR)
     encode_files(bpe, train_src, train_trg, DATA_DIR, PREFIX + '-train')
+    encode_files(bpe, val_src, val_trg, DATA_DIR, PREFIX + '-val')
     field_src = data.Field(
             tokenize=str.split,
             lower=True,
@@ -157,6 +167,12 @@ def main(DEVELOPMENT_MODE):
     pickle.dump(train_LM.examples, open(save_data_LM_train, 'wb'))
 
 if __name__ == '__main__':
+    """
+    If DEVELOPMENT_MODE is true, the program will use a smaller dataset that
+    includes 5000 pairs of sentences for the development purpose. I recommend
+    running in the development mode when you run the program for the first time
+    to make sure no bug exists.
+    """
     mkdir_if_needed(DATA_DIR_DEV)
     mkdir_if_needed(DATA_DIR_FULL)
     DEVELOPMENT_MODE = True
