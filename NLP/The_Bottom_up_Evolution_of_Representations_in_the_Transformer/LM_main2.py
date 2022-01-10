@@ -1,4 +1,3 @@
-from timeit import default_timer as timer
 from LM_helpers2 import train_epoch,evaluate, batchify
 import pickle
 from torchtext.legacy.data import Dataset,BucketIterator
