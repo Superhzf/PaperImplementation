@@ -1,107 +1,197 @@
+"""
+Modified from
+https://github.com/jadore801120/attention-is-all-you-need-pytorch/blob/master/preprocess.py
+
+Please be aware that the original file some bugs and it cannot run.
+"""
+import sys
 import os
-from io import open
-import torch
-from torch.utils.data import Dataset
-from transformers import BertTokenizer
-
-class Dictionary(object):
-    def __init__(self):
-        self.word2idx = {}
-        self.idx2word = []
-
-    def add_word(self, word):
-        if word not in self.word2idx:
-            self.idx2word.append(word)
-            self.word2idx[word] = len(self.idx2word) - 1
-        return self.word2idx[word]
-
-    def __len__(self):
-        return len(self.idx2word)
+from tqdm import tqdm
+from learn_bpe import learn_bpe
+from apply_bpe import BPE
+import codecs
+from torchtext.legacy import data
+from torchtext.legacy.datasets import TranslationDataset, LanguageModelingDataset
+from itertools import chain
+import pickle
 
 
-class Corpus(object):
-    def __init__(self, path, development_mode=False):
-        self.dictionary = Dictionary()
-        # TODO: currently, it only works for LM problem.
-        if not development_mode:
-            self.train = self.tokenize(os.path.join(path, 'preprocessed_en_trn.txt'))
-            self.val = self.tokenize(os.path.join(path, 'preprocessed_en_val.txt'))
-        else:
-            self.train = self.tokenize(os.path.join(path, 'develop_train.txt'))
-            self.val = self.tokenize(os.path.join(path, 'develop_valid.txt'))
+"""
+If DEVELOPMENT_MODE is true, the program will use a smaller dataset that
+includes 5000 pairs of sentences for the development purpose. I recommend
+running in the development mode when you run the program for the first time
+to make sure no bug exists.
+"""
+DEVELOPMENT_MODE = True
+"""
+Settings for the preprocessing
+"""
+RAW_DIR = './data/'
+PREFIX_DEV = "dev"
+PREFIX_FULL = "dev"
+_TRAIN_DATA_SOURCES_DEV ={"folder_name":"raw",
+                          "src": "train_en_dev.txt",
+                          "trg": "train_de_dev.txt"}
+_TRAIN_DATA_SOURCES_FULL ={"folder_name":"raw",
+                           "src": "train_en_full.txt",
+                           "trg": "train_de_full.txt"}
+_VAL_DATA_SOURCES = {"folder_name": "raw",
+                     "src": "valid_en.txt",
+                     "trg": "valid_de.txt"}
+SAVE_VOCAB_SRC = "bpe_vocab_src.pkl"
+SAVE_VOCAB_TRG = "bpe_vocab_trg.pkl"
+SAVE_DATA_MT_TRAIN = "bpe_MT_train.pkl"
+SAVE_DATA_LM_TRAIN = "bpe_LM_train.pkl"
+SAVE_DATA_MT_VAL = "bpe_MT_val.pkl"
+SAVE_DATA_LM_VAL = "bpe_LM_val.pkl"
+"""
+Settings for BPE
+"""
+DATA_DIR_DEV = './data/bpe_dev/'
+DATA_DIR_FULL = './data/bpe_full/'
+CODES = "codes.txt"
+# symbols is the vocabulary size
+SYMBOLS = 32000
+MIN_FREQUENCY = 6
+SEPARATOR = "@@"
+PAD_WORD = '<blank>'
+UNK_WORD = '<unk>'
+BOS_WORD = '<s>'
+EOS_WORD = '</s>'
+MAX_LEN = 100
 
-    def tokenize(self, path):
-        """Tokenizes a text file."""
-        assert os.path.exists(path)
-        # Add words to the dictionary
-        with open(path, 'r', encoding="utf8") as f:
-            for line in f:
-                words = line.split() + ['<eos>']
-                for word in words:
-                    self.dictionary.add_word(word)
+def mkdir_if_needed(dir_name):
+    if not os.path.isdir(dir_name):
+        os.makedirs(dir_name)
 
-        # Tokenize file content
-        with open(path, 'r', encoding="utf8") as f:
-            idss = []
-            for line in f:
-                words = line.split() + ['<eos>']
-                ids = []
-                for word in words:
-                    ids.append(self.dictionary.word2idx[word])
-                idss.append(torch.tensor(ids).type(torch.int64))
-            ids = torch.cat(idss)
 
-        return ids
+class TqdmUpTo(tqdm):
+    def update_to(self, b=1, bsize=1, tsize=None):
+        if tsize is not None:
+            self.total = tsize
+        self.update(b * bsize - self.n)
 
-class CorpusMT:
-    def __init__(self, path, development_mode=False):
-        self.train = self.read_data(path, 'preprocessed_en_trn.txt', 'preprocessed_de_trn.txt',development_mode)
-        self.val = self.read_data(path, 'preprocessed_en_val.txt', 'preprocessed_de_val.txt',development_mode)
 
-    def read_data(self,path, file_name_src,file_name_tgt,development_mode=False):
-        data_set = []
-        src_file = os.path.join(path, file_name_src)
-        tgt_file = os.path.join(path, file_name_tgt)
-        with open(src_file,'r') as f:
-            src = f.readlines()
-        f.close()
-        with open(tgt_file,'r') as f:
-            tgt = f.readlines()
-        f.close()
-        #TODO: the length of two files should be the same
-        min_len = min(len(src),len(tgt))
-        if development_mode:
-            min_len = 1000
-        for i in range(min_len):
-            this_group = (src[i],tgt[i])
-            data_set.append(this_group)
-        return data_set
+def extract(raw_dir, folder_name, src_filename, trg_filename):
+    folder = os.path.join(raw_dir, folder_name)
+    src_path = os.path.join(folder, src_filename)
+    trg_path = os.path.join(folder, trg_filename)
+    return src_path, trg_path
 
-class DatasetMLM(Dataset):
-    def __init__(self, src, tokenizer):
-        self.src = src
-        self.tokenizer = tokenizer
 
-    def __len__(self):
-        return len(self.src)
+def get_raw_files(raw_dir, sources):
+    raw_files = {}
+    src_file, trg_file = extract(raw_dir, sources['folder_name'], sources["src"], sources["trg"])
+    raw_files["src"]=(src_file)
+    raw_files["trg"]=(trg_file)
+    return raw_files
 
-    def __getitem__(self, idx):
-        src = self.src[idx]
-        return src
 
-class CorpusMLM:
-    def __init__(self,path, development_mode=False):
-        self.train = self.read_data(os.path.join(path, 'preprocessed_en_trn.txt'),development_mode,True)
-        self.val = self.read_data(os.path.join(path, 'preprocessed_en_val.txt'),development_mode,False)
+def encode_files(bpe, src_in_file, trg_in_file, data_dir, prefix):
+    src_out_file = os.path.join(data_dir, f"{prefix}.src")
+    trg_out_file = os.path.join(data_dir, f"{prefix}.trg")
 
-    def read_data(self, path,development_mode=False,training=True):
-        if training:
-            self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased", do_basic_tokenization = True)
-        with open(path,'r') as f:
-            src = f.readlines()
-        f.close()
-        if development_mode:
-            src_len = 120
-            src = src[:src_len]
-        this_dataset = DatasetMLM(src,self.tokenizer)
-        return this_dataset
+    if os.path.isfile(src_out_file) and os.path.isfile(trg_out_file):
+        sys.stderr.write(f"Encoded files found, skip the encoding process ...\n")
+
+    encode_file(bpe, src_in_file, src_out_file)
+    encode_file(bpe, trg_in_file, trg_out_file)
+    return src_out_file, trg_out_file
+
+
+def encode_file(bpe, in_file, out_file):
+    sys.stderr.write(f"Read raw content from {in_file} and \n"\
+            f"Write encoded content to {out_file}\n")
+
+    with codecs.open(in_file, encoding='utf-8') as in_f:
+        with codecs.open(out_file, 'w', encoding='utf-8') as out_f:
+            for line in in_f:
+                out_f.write(bpe.process_line(line))
+
+
+def filter_examples_with_length(x):
+        return len(vars(x)['src']) <= MAX_LEN and len(vars(x)['trg']) <= MAX_LEN
+
+
+def main(DEVELOPMENT_MODE):
+    if DEVELOPMENT_MODE:
+        DATA_DIR = DATA_DIR_DEV
+        _TRAIN_DATA_SOURCES = _TRAIN_DATA_SOURCES_DEV
+        PREFIX = PREFIX_DEV
+    else:
+        DATA_DIR = DATA_DIR_FULL
+        _TRAIN_DATA_SOURCES = _TRAIN_DATA_SOURCES_FULL
+        PREFIX = PREFIX_FULL
+
+    raw_train = get_raw_files(RAW_DIR, _TRAIN_DATA_SOURCES)
+    raw_val = get_raw_files(RAW_DIR, _VAL_DATA_SOURCES)
+    train_src = raw_train['src']
+    train_trg = raw_train['trg']
+    val_src = raw_val['src']
+    val_trg = raw_val['trg']
+
+    codes = os.path.join(DATA_DIR, CODES)
+    learn_bpe([raw_train['src'], raw_train['trg']], codes, SYMBOLS, MIN_FREQUENCY, True)
+    with codecs.open(codes, encoding='utf-8') as codes:
+        bpe = BPE(codes, separator=SEPARATOR)
+    encode_files(bpe, train_src, train_trg, DATA_DIR, PREFIX + '-train')
+    encode_files(bpe, val_src, val_trg, DATA_DIR, PREFIX + '-val')
+    field_src = data.Field(
+            tokenize=str.split,
+            lower=True,
+            pad_token=PAD_WORD,
+            init_token=BOS_WORD,
+            eos_token=EOS_WORD)
+    field_trg = data.Field(
+            tokenize=str.split,
+            lower=True,
+            pad_token=PAD_WORD,
+            init_token=BOS_WORD,
+            eos_token=EOS_WORD)
+    fields = (field_src, field_trg)
+
+    enc_train_files_prefix = PREFIX + '-train'
+    enc_val_files_prefix = PREFIX + '-val'
+    train_MT = TranslationDataset(
+        fields=fields,
+        path=os.path.join(DATA_DIR, enc_train_files_prefix),
+        exts=('.src','.trg'),
+        filter_pred=filter_examples_with_length)
+    valid_MT = TranslationDataset(
+        fields=fields,
+        path=os.path.join(DATA_DIR, enc_val_files_prefix),
+        exts=('.src','.trg'),
+        filter_pred=filter_examples_with_length)
+
+    enc_train_files_LM = enc_train_files_prefix+'.src'
+    enc_val_files_LM = enc_val_files_prefix+'.src'
+    train_LM = LanguageModelingDataset(
+        path=os.path.join(DATA_DIR, enc_train_files_LM),
+        text_field=field_src,
+        newline_eos=True)
+    valid_LM = LanguageModelingDataset(
+        path=os.path.join(DATA_DIR, enc_val_files_LM),
+        text_field=field_src,
+        newline_eos=True)
+
+    field_src.build_vocab(train_MT.src, min_freq=2)
+    field_trg.build_vocab(train_MT.trg, min_freq=2)
+
+    save_data_src = os.path.join(DATA_DIR, SAVE_VOCAB_SRC)
+    save_data_trg = os.path.join(DATA_DIR, SAVE_VOCAB_TRG)
+    save_data_MT_train = os.path.join(DATA_DIR, SAVE_DATA_MT_TRAIN)
+    save_data_LM_train = os.path.join(DATA_DIR, SAVE_DATA_LM_TRAIN)
+    save_data_MT_valid = os.path.join(DATA_DIR, SAVE_DATA_MT_VAL)
+    save_data_LM_valid = os.path.join(DATA_DIR, SAVE_DATA_LM_VAL)
+
+    pickle.dump(field_src, open(save_data_src, 'wb'))
+    pickle.dump(field_trg, open(save_data_trg, 'wb'))
+    pickle.dump(train_MT.examples, open(save_data_MT_train, 'wb'))
+    pickle.dump(train_LM.examples, open(save_data_LM_train, 'wb'))
+    pickle.dump(valid_MT.examples, open(save_data_MT_valid, 'wb'))
+    pickle.dump(valid_LM.examples, open(save_data_LM_valid, 'wb'))
+
+if __name__ == '__main__':
+    mkdir_if_needed(DATA_DIR_DEV)
+    mkdir_if_needed(DATA_DIR_FULL)
+    main(DEVELOPMENT_MODE)

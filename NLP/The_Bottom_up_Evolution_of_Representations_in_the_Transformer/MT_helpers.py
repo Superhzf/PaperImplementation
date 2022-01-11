@@ -4,19 +4,17 @@ import torch.nn as nn
 import math
 from torch.utils.data import DataLoader
 from models import generate_square_subsequent_mask
+import time
 
-DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-SRC_LANGUAGE = 'de'
-TGT_LANGUAGE = 'en'
-
-# define special symbols and indices
-UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX = 0, 1, 2, 3
-# make sure the tokens are in order of their indices to propertly insert them into vocab
-special_symbols = ['<unk>','<pad>','<bos>','<eos>']
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-def create_mask(src, tgt):
+def patch_trg(trg, pad_idx):
+    trg, gold = trg[:-1, :], trg[1:, :].contiguous().view(-1)
+    return trg, gold
+
+
+def create_mask(src, tgt, src_pad_idx, trg_pad_idx):
     """
     During training, we need a subsequent word mask that
     will prevent model to look into the future words when making predictions.
@@ -27,66 +25,73 @@ def create_mask(src, tgt):
 
     #TODO: Why tgt_mask and src_mask are different.
     tgt_mask = generate_square_subsequent_mask(tgt_seq_len)
-    src_mask = torch.zeros((src_seq_len, src_seq_len),device=DEVICE).type(torch.bool)
+    src_mask = torch.zeros((src_seq_len, src_seq_len),device=device).type(torch.bool)
 
-    src_padding_mask = (src == PAD_IDX).transpose(0, 1)
-    tgt_padding_mask = (tgt == PAD_IDX).transpose(0, 1)
+    src_padding_mask = (src == src_pad_idx).transpose(0, 1)
+    tgt_padding_mask = (tgt == trg_pad_idx).transpose(0, 1)
     return src_mask, tgt_mask, src_padding_mask, tgt_padding_mask
 
-def train_epoch(model, optimizer, batch_size, collate_fn, loss_fn, train_iter):
+
+def train_epoch(model, optimizer, batch_size, loss_fn, train_iter, src_pad_idx, trg_pad_idx, epoch):
     model.train()
-    losses = 0
-    train_dataloader = DataLoader(train_iter, batch_size=batch_size, collate_fn=collate_fn)
+    losses=0
+    i=0
+    for batch in train_iter:
+        start_time = time.time()
+        src = batch.src
+        trg = batch.trg
+        src_seq = src.to(device)
+        trg_seq, gold = map(lambda x: x.to(device), patch_trg(trg, trg_pad_idx))
+        trg_seq = trg_seq.to(device)
+        src_mask, trg_mask, src_padding_mask, trg_padding_mask = create_mask(src_seq, trg_seq, src_pad_idx, trg_pad_idx)
 
-    for src, tgt in train_dataloader:
-        src = src.to(DEVICE)
-        tgt = tgt.to(DEVICE)
-        #TODO: why end at -1?
-        tgt_input = tgt[:-1, :]
-
-        src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = create_mask(src, tgt_input)
-
-        logits = model(src=src,
+        logits = model(src=src_seq,
                        src_mask=src_mask,
-                       trg=tgt_input,
-                       tgt_mask=tgt_mask,
+                       trg=trg_seq,
+                       tgt_mask=trg_mask,
                        src_padding_mask=src_padding_mask,
-                       tgt_padding_mask=tgt_padding_mask,
+                       tgt_padding_mask=trg_padding_mask,
                        memory_key_padding_mask=src_padding_mask)
         optimizer.zero_grad()
-        #TOOD: why start at 1?
-        tgt_out = tgt[1:, :]
-        loss = loss_fn(logits.reshape(-1, logits.shape[-1]), tgt_out.reshape(-1))
+
+        loss = loss_fn(logits.reshape(-1, logits.shape[-1]), gold.reshape(-1))
         loss.backward()
 
         optimizer.step_and_update_lr()
         losses += loss.item()
+        # print the information at each batch
+        s_this_batch=(time.time() - start_time)
+        curr_loss=loss.item()
+        curr_ppl = math.exp(curr_loss)
+        print(f'| epoch {epoch:3d} | {i:5d} batch | '
+                  f's/batch {s_this_batch:5.2f} | '
+                  f'loss {curr_loss:5.2f} | ppl {curr_ppl:8.2f}')
+        i+=1
 
-    return losses / len(train_dataloader)
+    return losses / len(train_iter)
 
-def evaluate(model, batch_size,collate_fn, loss_fn, val_iter):
+def evaluate(model, batch_size, loss_fn, val_iter):
     model.eval()
     losses = 0
+    i=0
+    for batch in val_iter:
+        src = batch.src
+        trg = batch.trg
+        src_seq = src.to(device)
+        trg_seq, gold = map(lambda x: x.to(device), patch_trg(trg, trg_pad_idx))
+        trg_seq = trg_seq.to(device)
+        src_mask, trg_mask, src_padding_mask, trg_padding_mask = create_mask(src_seq, trg_seq, src_pad_idx, trg_pad_idx)
 
-    val_dataloader = DataLoader(val_iter, batch_size=batch_size, collate_fn=collate_fn)
-
-    for src, tgt in val_dataloader:
-        src = src.to(DEVICE)
-        tgt = tgt.to(DEVICE)
-
-        tgt_input = tgt[:-1, :]
-
-        src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = create_mask(src, tgt_input)
-
-        logits = model(src=src,
+        logits = model(src=src_seq,
                        src_mask=src_mask,
-                       trg=tgt_input,
-                       tgt_mask=tgt_mask,
+                       trg=trg_seq,
+                       tgt_mask=trg_mask,
                        src_padding_mask=src_padding_mask,
-                       tgt_padding_mask=tgt_padding_mask,
+                       tgt_padding_mask=trg_padding_mask,
                        memory_key_padding_mask=src_padding_mask)
-        tgt_out = tgt[1:, :]
-        loss = loss_fn(logits.reshape(-1, logits.shape[-1]), tgt_out.reshape(-1))
-        losses += loss.item()
 
-    return losses / len(val_dataloader)
+        loss = loss_fn(logits.reshape(-1, logits.shape[-1]), gold.reshape(-1))
+        losses += loss.item()
+        print(f"Round {i} in the validation stage")
+
+    return losses / len(val_iter)
