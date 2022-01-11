@@ -30,8 +30,8 @@ _TRAIN_DATA_SOURCES_FULL ={"folder_name":"raw",
 _VAL_DATA_SOURCES = {"folder_name": "raw",
                      "src": "valid_en.txt",
                      "trg": "valid_de.txt"}
-SAVE_DATA_SRC = "bpe_vocab_src.pkl"
-SAVE_DATA_TRG = "bpe_vocab_trg.pkl"
+SAVE_VOCAB_SRC = "bpe_vocab_src.pkl"
+SAVE_VOCAB_TRG = "bpe_vocab_trg.pkl"
 SAVE_DATA_MT_TRAIN = "bpe_MT_train.pkl"
 SAVE_DATA_LM_TRAIN = "bpe_LM_train.pkl"
 SAVE_DATA_MT_VAL = "bpe_MT_val.pkl"
@@ -169,8 +169,8 @@ def main(DEVELOPMENT_MODE):
     field_src.build_vocab(train_MT.src, min_freq=2)
     field_trg.build_vocab(train_MT.trg, min_freq=2)
 
-    save_data_src = os.path.join(DATA_DIR, SAVE_DATA_SRC)
-    save_data_trg = os.path.join(DATA_DIR, SAVE_DATA_TRG)
+    save_data_src = os.path.join(DATA_DIR, SAVE_VOCAB_SRC)
+    save_data_trg = os.path.join(DATA_DIR, SAVE_VOCAB_TRG)
     save_data_MT_train = os.path.join(DATA_DIR, SAVE_DATA_MT_TRAIN)
     save_data_LM_train = os.path.join(DATA_DIR, SAVE_DATA_LM_TRAIN)
     save_data_MT_valid = os.path.join(DATA_DIR, SAVE_DATA_MT_VAL)
