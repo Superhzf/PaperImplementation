@@ -59,7 +59,7 @@ PAD_WORD = '<blank>'
 UNK_WORD = '<unk>'
 BOS_WORD = '<s>'
 EOS_WORD = '</s>'
-MAX_LEN = 100
+MAX_LEN = 200
 
 def mkdir_if_needed(dir_name):
     if not os.path.isdir(dir_name):
