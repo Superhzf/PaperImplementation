@@ -22,8 +22,20 @@ NLAYERS = 6
 NHEAD = 8
 DROPOUT = 0.1
 # TOOD: the current value is for development, change EPOCHS=10 and BATCH_SIZE=2048
-EPOCHS = 1
+EPOCHS_DEV = 1
+EPOCHS_FULL = 10
 BATCH_SIZE = 100
+"""
+SYNC_EVERY_STEPS=160 means that we want to accumulate the gradients every 160
+batches. Why do we want this? Because if we want to set up the BATCH_SIZE=16000,
+then we may not have enough memory to process it, so we set up BATCH_SIZE=100 and
+accumulate the gradients for 160 batches before updating the parameters.
+
+Ref:
+https://discuss.pytorch.org/t/why-do-we-need-to-set-the-gradients-manually-to-zero-in-pytorch/4903/20?u=alband
+"""
+SYNC_EVERY_BATCH_DEV = 160
+SYNC_EVERY_BATCH_FULL = 10
 # TOOD: the current value is for development, change EPOCHS=10 and BATCH_SIZE=2048
 N_WARMUP_STEPS = 4000
 BETAS = (0.9, 0.98)
