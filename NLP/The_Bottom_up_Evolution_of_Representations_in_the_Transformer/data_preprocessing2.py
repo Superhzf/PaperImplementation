@@ -34,6 +34,8 @@ SAVE_DATA_SRC = "bpe_vocab_src.pkl"
 SAVE_DATA_TRG = "bpe_vocab_trg.pkl"
 SAVE_DATA_MT_TRAIN = "bpe_MT_train.pkl"
 SAVE_DATA_LM_TRAIN = "bpe_LM_train.pkl"
+SAVE_DATA_MT_VAL = "bpe_MT_val.pkl"
+SAVE_DATA_LM_VAL = "bpe_LM_val.pkl"
 """
 Settings for BPE
 """
@@ -141,15 +143,26 @@ def main(DEVELOPMENT_MODE):
     fields = (field_src, field_trg)
 
     enc_train_files_prefix = PREFIX + '-train'
+    enc_val_files_prefix = PREFIX + '-val'
     train_MT = TranslationDataset(
         fields=fields,
         path=os.path.join(DATA_DIR, enc_train_files_prefix),
         exts=('.src','.trg'),
         filter_pred=filter_examples_with_length)
+    valid_MT = TranslationDataset(
+        fields=fields,
+        path=os.path.join(DATA_DIR, enc_val_files_prefix),
+        exts=('.src','.trg'),
+        filter_pred=filter_examples_with_length)
 
     enc_train_files_LM = enc_train_files_prefix+'.src'
+    enc_val_files_LM = enc_val_files_prefix+'.src'
     train_LM = LanguageModelingDataset(
         path=os.path.join(DATA_DIR, enc_train_files_LM),
+        text_field=field_src,
+        newline_eos=True)
+    valid_LM = LanguageModelingDataset(
+        path=os.path.join(DATA_DIR, enc_val_files_LM),
         text_field=field_src,
         newline_eos=True)
 
@@ -160,11 +173,15 @@ def main(DEVELOPMENT_MODE):
     save_data_trg = os.path.join(DATA_DIR, SAVE_DATA_TRG)
     save_data_MT_train = os.path.join(DATA_DIR, SAVE_DATA_MT_TRAIN)
     save_data_LM_train = os.path.join(DATA_DIR, SAVE_DATA_LM_TRAIN)
+    save_data_MT_valid = os.path.join(DATA_DIR, SAVE_DATA_MT_VAL)
+    save_data_LM_valid = os.path.join(DATA_DIR, SAVE_DATA_LM_VAL)
 
     pickle.dump(field_src, open(save_data_src, 'wb'))
     pickle.dump(field_trg, open(save_data_trg, 'wb'))
     pickle.dump(train_MT.examples, open(save_data_MT_train, 'wb'))
     pickle.dump(train_LM.examples, open(save_data_LM_train, 'wb'))
+    pickle.dump(valid_MT.examples, open(save_data_MT_valid, 'wb'))
+    pickle.dump(valid_LM.examples, open(save_data_LM_valid, 'wb'))
 
 if __name__ == '__main__':
     """
