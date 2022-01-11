@@ -59,14 +59,14 @@ for epoch in range(1, EPOCHS+1):
     train_loss = train_epoch(model, optimizer, BATCH_SIZE, loss_fn, train_iter, src_pad_idx, trg_pad_idx,epoch)
     end_time = timer()
     valid_loss = evaluate(model,BATCH_SIZE, loss_fn, valid_iter)
-    val_ppl = math.exp(val_loss)
+    valid_ppl = math.exp(val_loss)
     if valid_loss<best_loss:
         best_loss=valid_loss
         best_ppl=val_ppl
         best_model=model
     print(f"Epoch: {epoch}|Train loss: {train_loss:.2f}|"
             f"Current validation loss: {valid_loss:.2f}|"
-            f"Current validation ppl: {val_ppl:.2f}|"
+            f"Current validation ppl: {valid_ppl:.2f}|"
             f"Best validation loss: {best_loss:.2f}|"
             f"Best validation ppl: {best_ppl:.2f}|"
             f"Epoch time = {(end_time - start_time):.2f}s")

@@ -50,12 +50,10 @@ def get_batch(source: Tensor, i: int) -> Tuple[Tensor, Tensor]:
 def train_epoch(model: nn.Module, train_data, criterion, ntokens, optimizer,epoch) -> None:
     model.train()  # turn on train mode
     total_loss = 0.
-    log_interval = 100
-    start_time = time.time()
     src_mask = generate_square_subsequent_mask(bptt).to(device)
-
     num_batches = len(train_data) // bptt
     for batch, i in enumerate(range(0, len(train_data) - 1, bptt)):
+        start_time = time.time()
         data, targets = get_batch(train_data, i)
         seq_len = data.size(0)
         if seq_len != bptt:  # only on last batch
@@ -68,16 +66,14 @@ def train_epoch(model: nn.Module, train_data, criterion, ntokens, optimizer,epoc
         optimizer.step_and_update_lr()
         # print(f"This is the {batch}th batch")
         total_loss += loss.item()
-        if batch % log_interval == 0 and batch > 0:
-            lr = optimizer._optimizer.param_groups[0]['lr']
-            ms_per_batch = (time.time() - start_time) * 1000 / log_interval
-            cur_loss = total_loss / log_interval
-            ppl = math.exp(cur_loss)
-            print(f'| epoch {epoch:3d} | {batch:5d}/{num_batches:5d} batches | '
-                  f'lr {lr:02.2f} | ms/batch {ms_per_batch:5.2f} | '
-                  f'loss {cur_loss:5.2f} | ppl {ppl:8.2f}')
-            total_loss = 0
-            start_time = time.time()
+        s_per_batch = (time.time() - start_time)
+        cur_loss = loss.item()
+        cur_ppl = math.exp(cur_loss)
+        print(f'| epoch {epoch:3d} | {batch:5d}th batch | '
+              f's/batch {s_per_batch:5.2f} | '
+              f'loss {cur_loss:5.2f} | ppl {cur_ppl:8.2f}')
+        start_time = time.time()
+    return total_loss/len(train_data)
 
 def evaluate(model: nn.Module, eval_data: Tensor, ntokens: int, criterion) -> float:
     model.eval()  # turn on evaluation mode
@@ -92,4 +88,4 @@ def evaluate(model: nn.Module, eval_data: Tensor, ntokens: int, criterion) -> fl
             output = model(data, src_mask)
             output_flat = output.view(-1, ntokens)
             total_loss += seq_len * criterion(output_flat, targets).item()
-    return total_loss / (len(eval_data) - 1)
+    return total_loss / len(eval_data)

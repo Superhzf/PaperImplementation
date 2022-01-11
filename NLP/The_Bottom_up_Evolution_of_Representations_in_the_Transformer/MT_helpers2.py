@@ -63,7 +63,7 @@ def train_epoch(model, optimizer, batch_size, loss_fn, train_iter, src_pad_idx, 
         s_this_batch=(time.time() - start_time)
         curr_loss=loss.item()
         curr_ppl = math.exp(curr_loss)
-        print(f'| epoch {epoch:3d} | {i:5d} batches | '
+        print(f'| epoch {epoch:3d} | {i:5d} batch | '
                   f's/batch {s_this_batch:5.2f} | '
                   f'loss {curr_loss:5.2f} | ppl {curr_ppl:8.2f}')
         i+=1
