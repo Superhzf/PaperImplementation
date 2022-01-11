@@ -15,6 +15,14 @@ from torchtext.legacy.datasets import TranslationDataset, LanguageModelingDatase
 from itertools import chain
 import pickle
 
+
+"""
+If DEVELOPMENT_MODE is true, the program will use a smaller dataset that
+includes 5000 pairs of sentences for the development purpose. I recommend
+running in the development mode when you run the program for the first time
+to make sure no bug exists.
+"""
+DEVELOPMENT_MODE = True
 """
 Settings for the preprocessing
 """
@@ -184,13 +192,6 @@ def main(DEVELOPMENT_MODE):
     pickle.dump(valid_LM.examples, open(save_data_LM_valid, 'wb'))
 
 if __name__ == '__main__':
-    """
-    If DEVELOPMENT_MODE is true, the program will use a smaller dataset that
-    includes 5000 pairs of sentences for the development purpose. I recommend
-    running in the development mode when you run the program for the first time
-    to make sure no bug exists.
-    """
     mkdir_if_needed(DATA_DIR_DEV)
     mkdir_if_needed(DATA_DIR_FULL)
-    DEVELOPMENT_MODE = True
     main(DEVELOPMENT_MODE)
