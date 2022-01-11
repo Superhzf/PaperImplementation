@@ -63,7 +63,6 @@ def train_epoch(model, optimizer, batch_size, loss_fn, train_iter, src_pad_idx, 
         if i%sync_every_steps == 0:
             optimizer.step_and_update_lr()
             optimizer.zero_grad()
-            print("Great, model parameters have been updated")
 
         losses += curr_loss
         # print the information at each batch

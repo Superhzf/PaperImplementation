@@ -47,11 +47,12 @@ def get_batch(source: Tensor, i: int) -> Tuple[Tensor, Tensor]:
     target = source[i+1:i+1+seq_len].view(-1)
     return data, target
 
-def train_epoch(model: nn.Module, train_data, criterion, ntokens, optimizer,epoch) -> None:
+def train_epoch(model: nn.Module, train_data, criterion, ntokens, optimizer,epoch, sync_every_steps) -> None:
     model.train()  # turn on train mode
     total_loss = 0.
     src_mask = generate_square_subsequent_mask(bptt).to(device)
     num_batches = len(train_data) // bptt
+    optimizer.zero_grad()
     for batch, i in enumerate(range(0, len(train_data) - 1, bptt)):
         start_time = time.time()
         data, targets = get_batch(train_data, i)
@@ -60,18 +61,20 @@ def train_epoch(model: nn.Module, train_data, criterion, ntokens, optimizer,epoc
             src_mask = src_mask[:seq_len, :seq_len]
         output = model(data, src_mask)
         loss = criterion(output.view(-1, ntokens), targets)
-
-        optimizer.zero_grad()
+        curr_loss=loss.item()
+        loss = loss/sync_every_steps
         loss.backward()
-        optimizer.step_and_update_lr()
-        # print(f"This is the {batch}th batch")
-        total_loss += loss.item()
+
+        if (batch+1)%sync_every_steps == 0:
+            optimizer.step_and_update_lr()
+            optimizer.zero_grad()
+
+        total_loss += curr_loss
         s_per_batch = (time.time() - start_time)
-        cur_loss = loss.item()
-        cur_ppl = math.exp(cur_loss)
+        curr_ppl = math.exp(curr_loss)
         print(f'| epoch {epoch:3d} | {batch:5d}th batch | '
               f's/batch {s_per_batch:5.2f} | '
-              f'loss {cur_loss:5.2f} | ppl {cur_ppl:8.2f}')
+              f'loss {curr_loss:5.2f} | ppl {curr_ppl:8.2f}')
         start_time = time.time()
     return total_loss/len(train_data)
 
