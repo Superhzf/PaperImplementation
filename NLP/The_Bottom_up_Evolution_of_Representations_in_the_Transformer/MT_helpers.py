@@ -32,10 +32,12 @@ def create_mask(src, tgt, src_pad_idx, trg_pad_idx):
     return src_mask, tgt_mask, src_padding_mask, tgt_padding_mask
 
 
-def train_epoch(model, optimizer, batch_size, loss_fn, train_iter, src_pad_idx, trg_pad_idx, epoch):
+def train_epoch(model, optimizer, batch_size, loss_fn, train_iter, src_pad_idx, trg_pad_idx, epoch, sync_every_steps):
     model.train()
     losses=0
-    i=0
+    sync_loss=0
+    i=1
+    optimizer.zero_grad()
     for batch in train_iter:
         start_time = time.time()
         src = batch.src
@@ -52,16 +54,20 @@ def train_epoch(model, optimizer, batch_size, loss_fn, train_iter, src_pad_idx, 
                        src_padding_mask=src_padding_mask,
                        tgt_padding_mask=trg_padding_mask,
                        memory_key_padding_mask=src_padding_mask)
-        optimizer.zero_grad()
 
         loss = loss_fn(logits.reshape(-1, logits.shape[-1]), gold.reshape(-1))
+        curr_loss=loss.item()
+        loss = loss/sync_every_steps
         loss.backward()
 
-        optimizer.step_and_update_lr()
-        losses += loss.item()
+        if i%sync_every_steps == 0:
+            optimizer.step_and_update_lr()
+            optimizer.zero_grad()
+            print("Great, model parameters have been updated")
+
+        losses += curr_loss
         # print the information at each batch
         s_this_batch=(time.time() - start_time)
-        curr_loss=loss.item()
         curr_ppl = math.exp(curr_loss)
         print(f'| epoch {epoch:3d} | {i:5d} batch | '
                   f's/batch {s_this_batch:5.2f} | '

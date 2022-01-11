@@ -34,8 +34,8 @@ accumulate the gradients for 160 batches before updating the parameters.
 Ref:
 https://discuss.pytorch.org/t/why-do-we-need-to-set-the-gradients-manually-to-zero-in-pytorch/4903/20?u=alband
 """
-SYNC_EVERY_BATCH_DEV = 160
-SYNC_EVERY_BATCH_FULL = 10
+SYNC_EVERY_BATCH_DEV = 10
+SYNC_EVERY_BATCH_FULL = 160
 # TOOD: the current value is for development, change EPOCHS=10 and BATCH_SIZE=2048
 N_WARMUP_STEPS = 4000
 BETAS = (0.9, 0.98)

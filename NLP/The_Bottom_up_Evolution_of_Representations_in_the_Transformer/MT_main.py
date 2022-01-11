@@ -1,20 +1,27 @@
 from timeit import default_timer as timer
-from MT_helpers2 import train_epoch,evaluate
+from MT_helpers import train_epoch,evaluate
 import pickle
 from torchtext.legacy.data import Dataset,BucketIterator
 import torch
-from data_preprocessing2 import DEVELOPMENT_MODE
-from data_preprocessing2 import SAVE_VOCAB_SRC, SAVE_VOCAB_TRG, SAVE_DATA_MT_TRAIN, SAVE_DATA_MT_VAL
-from data_preprocessing2 import DATA_DIR_DEV, DATA_DIR_FULL, PAD_WORD
-from models import D_MODEL, FFN_HID_DIM, NLAYERS, NHEAD, BATCH_SIZE, DROPOUT, EPOCHS
+from data_preprocessing import DEVELOPMENT_MODE
+from data_preprocessing import SAVE_VOCAB_SRC, SAVE_VOCAB_TRG, SAVE_DATA_MT_TRAIN, SAVE_DATA_MT_VAL
+from data_preprocessing import DATA_DIR_DEV, DATA_DIR_FULL, PAD_WORD
+from models import D_MODEL, FFN_HID_DIM, NLAYERS, NHEAD, BATCH_SIZE, DROPOUT
+from models import EPOCHS_DEV, EPOCHS_FULL, SYNC_EVERY_BATCH_DEV, SYNC_EVERY_BATCH_FULL
 from models import Seq2SeqTransformer, LOSS_FN, ScheduledOptim
 import os
 import math
 
+
 if DEVELOPMENT_MODE:
     DATA_DIR=DATA_DIR_DEV
+    EPOCHS=EPOCHS_DEV
+    SYNC_EVERY_STEPS=SYNC_EVERY_BATCH_DEV
 else:
     DATA_DIR=DATA_DIR_FULL
+    EPOCHS=EPOCHS_FULL
+    SYNC_EVERY_STEPS=SYNC_EVERY_BATCH_FULL
+
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 vocab_pkl_src = os.path.join(DATA_DIR, SAVE_VOCAB_SRC)
@@ -53,10 +60,9 @@ optimizer=ScheduledOptim(model.parameters())
 best_loss=float('inf')
 best_ppl=None
 best_model =None
-print("len(train_iter)",len(train_iter))
 for epoch in range(1, EPOCHS+1):
     start_time = timer()
-    train_loss = train_epoch(model, optimizer, BATCH_SIZE, loss_fn, train_iter, src_pad_idx, trg_pad_idx,epoch)
+    train_loss = train_epoch(model, optimizer, BATCH_SIZE, loss_fn, train_iter, src_pad_idx, trg_pad_idx,epoch, SYNC_EVERY_STEPS)
     end_time = timer()
     valid_loss = evaluate(model,BATCH_SIZE, loss_fn, valid_iter)
     valid_ppl = math.exp(val_loss)
