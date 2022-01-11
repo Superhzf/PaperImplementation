@@ -9,6 +9,7 @@ from models import D_MODEL, FFN_HID_DIM, NLAYERS, NHEAD, BATCH_SIZE, DROPOUT, EP
 from models import TransformerModel, LOSS_FN, ScheduledOptim
 import os
 import time
+import math
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 if DEVELOPMENT_MODE:
@@ -54,7 +55,7 @@ for epoch in range(1, EPOCHS + 1):
     epoch_start_time = time.time()
     train_loss = train_epoch(model,train_iter, criterion, src_vocab_size, optimizer, epoch, src_pad_idx)
     elapsed = time.time() - epoch_start_time
-    valid_loss = evaluate(model, valid_iter, src_vocab_size, criterion)
+    valid_loss = evaluate(model, valid_iter, src_vocab_size, criterion, src_pad_idx)
     train_ppl = math.exp(train_loss)
     valid_ppl = math.exp(valid_loss)
     if valid_loss<best_loss:
@@ -67,5 +68,5 @@ for epoch in range(1, EPOCHS + 1):
             f"Current validation ppl: {valid_ppl:.2f}|"
             f"Best validation loss: {best_loss:.2f}|"
             f"Best validation ppl: {best_ppl:.2f}|"
-            f"Epoch time = {(end_time - start_time):.2f}s")
+            f"Epoch time = {elapsed:.2f}s")
     print('-' * 89)

@@ -50,7 +50,7 @@ def train_epoch(model, dataloader, criterion, ntokens, optimizer, epoch, src_pad
 
     return total_loss/len(dataloader)
 
-def evaluate(model: nn.Module, dataloader, ntokens: int, criterion) -> float:
+def evaluate(model: nn.Module, dataloader, ntokens: int, criterion, src_pad_idx) -> float:
     model.eval()  # turn on evaluation mode
     total_loss = 0.
     i=0
