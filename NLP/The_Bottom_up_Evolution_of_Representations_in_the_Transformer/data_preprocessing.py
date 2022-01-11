@@ -20,7 +20,8 @@ import pickle
 If DEVELOPMENT_MODE is true, the program will use a smaller dataset that
 includes 5000 pairs of sentences for the development purpose. I recommend
 running in the development mode when you run the program for the first time
-to make sure no bug exists.
+to make sure no bug exists. You only have to modify it here once, other places
+will cite the variable from here.
 """
 DEVELOPMENT_MODE = True
 """
