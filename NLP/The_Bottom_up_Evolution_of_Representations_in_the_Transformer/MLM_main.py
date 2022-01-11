@@ -1,11 +1,12 @@
-from MLM_helpers2 import train_epoch,evaluate
+from MLM_helpers import train_epoch,evaluate
 import pickle
 from torchtext.legacy.data import Dataset,BucketIterator
 import torch
-from data_preprocessing2 import DEVELOPMENT_MODE
-from data_preprocessing2 import SAVE_VOCAB_SRC, SAVE_VOCAB_TRG, SAVE_DATA_MT_TRAIN, SAVE_DATA_MT_VAL
-from data_preprocessing2 import DATA_DIR_DEV, DATA_DIR_FULL, PAD_WORD
-from models import D_MODEL, FFN_HID_DIM, NLAYERS, NHEAD, BATCH_SIZE, DROPOUT, EPOCHS
+from data_preprocessing import DEVELOPMENT_MODE
+from data_preprocessing import SAVE_VOCAB_SRC, SAVE_VOCAB_TRG, SAVE_DATA_MT_TRAIN, SAVE_DATA_MT_VAL
+from data_preprocessing import DATA_DIR_DEV, DATA_DIR_FULL, PAD_WORD
+from models import D_MODEL, FFN_HID_DIM, NLAYERS, NHEAD, BATCH_SIZE, DROPOUT
+from models import EPOCHS_DEV, EPOCHS_FULL, SYNC_EVERY_BATCH_DEV, SYNC_EVERY_BATCH_FULL
 from models import TransformerModel, LOSS_FN, ScheduledOptim
 import os
 import time
@@ -14,8 +15,14 @@ import math
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 if DEVELOPMENT_MODE:
     DATA_DIR=DATA_DIR_DEV
+    EPOCHS=EPOCHS_DEV
+    SYNC_EVERY_STEPS=SYNC_EVERY_BATCH_DEV
+
 else:
     DATA_DIR=DATA_DIR_FULL
+    EPOCHS=EPOCHS_FULL
+    SYNC_EVERY_STEPS=SYNC_EVERY_BATCH_FULL
+
 
 vocab_pkl_src = os.path.join(DATA_DIR, SAVE_VOCAB_SRC)
 vocab_pkl_trg = os.path.join(DATA_DIR, SAVE_VOCAB_TRG)
@@ -53,7 +60,7 @@ best_model =None
 # train the model
 for epoch in range(1, EPOCHS + 1):
     epoch_start_time = time.time()
-    train_loss = train_epoch(model,train_iter, criterion, src_vocab_size, optimizer, epoch, src_pad_idx)
+    train_loss = train_epoch(model,train_iter, criterion, src_vocab_size, optimizer, epoch, src_pad_idx, SYNC_EVERY_STEPS)
     elapsed = time.time() - epoch_start_time
     valid_loss = evaluate(model, valid_iter, src_vocab_size, criterion, src_pad_idx)
     train_ppl = math.exp(train_loss)

@@ -12,12 +12,13 @@ import os
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-def train_epoch(model, dataloader, criterion, ntokens, optimizer, epoch, src_pad_idx):
+def train_epoch(model, dataloader, criterion, ntokens, optimizer, epoch, src_pad_idx, sync_every_steps):
     model.train()
     total_loss = 0
     log_interval = 200
     start_time = time.time()
-    i=0
+    i=1
+    optimizer.zero_grad()
     for batch in dataloader:
         src = batch.src
         src_seq = src.to(device)
@@ -33,15 +34,17 @@ def train_epoch(model, dataloader, criterion, ntokens, optimizer, epoch, src_pad
 
         out = model(input.to(device), src_mask.to(device))
         loss = criterion(out.view(-1, ntokens), src_seq.view(-1).to(device))
-
-        optimizer.zero_grad()
+        curr_loss=loss.item()
+        loss = loss/sync_every_steps
         loss.backward()
-        optimizer.step_and_update_lr()
 
-        total_loss += loss.item()
+        if i%sync_every_steps == 0:
+            optimizer.step_and_update_lr()
+            optimizer.zero_grad()
+
+        total_loss += curr_loss
         # print the information at each batch
         s_this_batch=(time.time() - start_time)
-        curr_loss=loss.item()
         curr_ppl = math.exp(curr_loss)
         print(f'| epoch {epoch:3d} | {i:5d} batch | '
                   f's/batch {s_this_batch:5.2f} | '
