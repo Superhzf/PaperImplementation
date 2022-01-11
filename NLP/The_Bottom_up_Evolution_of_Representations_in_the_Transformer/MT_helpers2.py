@@ -4,6 +4,7 @@ import torch.nn as nn
 import math
 from torch.utils.data import DataLoader
 from models import generate_square_subsequent_mask
+import time
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -31,12 +32,12 @@ def create_mask(src, tgt, src_pad_idx, trg_pad_idx):
     return src_mask, tgt_mask, src_padding_mask, tgt_padding_mask
 
 
-def train_epoch(model, optimizer, batch_size, loss_fn, train_iter, src_pad_idx, trg_pad_idx):
+def train_epoch(model, optimizer, batch_size, loss_fn, train_iter, src_pad_idx, trg_pad_idx, epoch):
     model.train()
     losses=0
-
     i=0
     for batch in train_iter:
+        start_time = time.time()
         src = batch.src
         trg = batch.trg
         src_seq = src.to(device)
@@ -58,16 +59,21 @@ def train_epoch(model, optimizer, batch_size, loss_fn, train_iter, src_pad_idx, 
 
         optimizer.step_and_update_lr()
         losses += loss.item()
+        # print the information at each batch
+        s_this_batch=(time.time() - start_time)
+        curr_loss=loss.item()
+        curr_ppl = math.exp(curr_loss)
+        print(f'| epoch {epoch:3d} | {i:5d} batches | '
+                  f's/batch {s_this_batch:5.2f} | '
+                  f'loss {curr_loss:5.2f} | ppl {curr_ppl:8.2f}')
         i+=1
-        print(f"Round {i}")
 
-
-    return losses / len(train_dataloader)
+    return losses / len(train_iter)
 
 def evaluate(model, batch_size, loss_fn, val_iter):
     model.eval()
     losses = 0
-
+    i=0
     for batch in val_iter:
         src = batch.src
         trg = batch.trg
@@ -86,5 +92,6 @@ def evaluate(model, batch_size, loss_fn, val_iter):
 
         loss = loss_fn(logits.reshape(-1, logits.shape[-1]), gold.reshape(-1))
         losses += loss.item()
+        print(f"Round {i} in the validation stage")
 
-    return losses / len(val_dataloader)
+    return losses / len(val_iter)
