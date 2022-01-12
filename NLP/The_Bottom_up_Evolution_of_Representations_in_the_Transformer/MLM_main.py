@@ -56,6 +56,7 @@ model = TransformerModel(src_vocab_size=src_vocab_size,
                          dim_feedforward=FFN_HID_DIM,
                          num_encoder_layer=NLAYERS,
                          dropout=DROPOUT)
+model=model.to(device)
 criterion = LOSS_FN()
 optimizer = ScheduledOptim(model.parameters())
 best_loss=float('inf')
