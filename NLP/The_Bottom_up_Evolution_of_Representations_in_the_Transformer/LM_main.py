@@ -1,5 +1,6 @@
 # Modified from
 # https://pytorch.org/tutorials/beginner/translation_transformer.html
+# https://github.com/lyeoni/pretraining-for-language-understanding/blob/master/dataset_utils.py#L35
 from timeit import default_timer as timer
 from LM_helpers import train_epoch,evaluate
 import pickle
