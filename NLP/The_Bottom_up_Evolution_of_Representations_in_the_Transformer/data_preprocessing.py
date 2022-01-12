@@ -59,10 +59,18 @@ BOS_WORD = '<s>'
 EOS_WORD = '</s>'
 MAX_LEN = 200
 """
-Settings for saving the best models
+Settings for saving the best models.
+
+NO_BETTER_THAN_ROUND means that once the model does not improve for
+the next NO_BETTER_THAN_ROUND epochs, the training
+procedure should stop. Per the authors, they monitor the performance on the
+validation set and stop the training when the performance does not improve for
+a while (no exact round is released). I choose NO_BETTER_THAN_ROUND=33 because
+the parameters will not be updated every 16 epochs. I think the parameters
+have to be updated at least 2 times before the training stops.
 """
 SAVE_MODEL_PATH='./data/TrainedModel/'
-NO_BETTER_THAN_ROUND=21
+NO_BETTER_THAN_ROUND=33
 
 def mkdir_if_needed(dir_name):
     if not os.path.isdir(dir_name):
