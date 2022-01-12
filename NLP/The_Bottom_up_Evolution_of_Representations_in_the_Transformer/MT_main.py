@@ -8,6 +8,7 @@ import torch
 from data_preprocessing import DEVELOPMENT_MODE
 from data_preprocessing import SAVE_VOCAB_SRC, SAVE_VOCAB_TRG, SAVE_DATA_MT_TRAIN, SAVE_DATA_MT_VAL
 from data_preprocessing import DATA_DIR_DEV, DATA_DIR_FULL, PAD_WORD
+from data_preprocessing import SAVE_MODEL_PATH, NO_BETTER_THAN_ROUND
 from models import D_MODEL, FFN_HID_DIM, NLAYERS, NHEAD, BATCH_SIZE, DROPOUT
 from models import EPOCHS_DEV, EPOCHS_FULL, SYNC_EVERY_BATCH_DEV, SYNC_EVERY_BATCH_FULL
 from models import Seq2SeqTransformer, LOSS_FN, ScheduledOptim
@@ -61,7 +62,11 @@ loss_fn=LOSS_FN(ignore_index=trg_pad_idx)
 optimizer=ScheduledOptim(model.parameters())
 best_loss=float('inf')
 best_ppl=None
-best_model =None
+best_model=None
+# round is used to count how many epocs have been passed since no better result
+# returns.
+round=0
+
 for epoch in range(1, EPOCHS+1):
     start_time = timer()
     train_loss = train_epoch(model, optimizer, BATCH_SIZE, loss_fn, train_iter, src_pad_idx, trg_pad_idx,epoch, SYNC_EVERY_STEPS)
@@ -72,9 +77,17 @@ for epoch in range(1, EPOCHS+1):
         best_loss=valid_loss
         best_ppl=val_ppl
         best_model=model
+        round=0
+    else:
+        round+=1
+        if round>=NO_BETTER_THAN_ROUND:
+            torch.save(best_model, os.path.join(SAVE_MODEL_PATH,"LM.pt"))
+        break
     print(f"Epoch: {epoch}|Train loss: {train_loss:.2f}|"
             f"Current validation loss: {valid_loss:.2f}|"
             f"Current validation ppl: {valid_ppl:.2f}|"
             f"Best validation loss: {best_loss:.2f}|"
             f"Best validation ppl: {best_ppl:.2f}|"
             f"Epoch time = {(end_time - start_time):.2f}s")
+
+print(f"Training is done! The best model has been save to {SAVE_MODEL_PATH}")
