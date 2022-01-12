@@ -1,3 +1,6 @@
+# Modified from
+# https://towardsdatascience.com/masked-language-modelling-with-bert-7d49793e5d2c
+# https://www.kaggle.com/mojammel/masked-language-model-with-pytorch-transformer
 from MLM_helpers import train_epoch,evaluate
 import pickle
 from torchtext.legacy.data import Dataset,BucketIterator

@@ -1,3 +1,5 @@
+# Modified from
+# https://pytorch.org/tutorials/beginner/transformer_tutorial.html
 from LM_helpers import train_epoch,evaluate, batchify
 import pickle
 from torchtext.legacy.data import Dataset,BucketIterator
@@ -29,6 +31,7 @@ field_src=pickle.load(open(vocab_pkl_src, 'rb'))
 train_examples=pickle.load(open(train_pkl, 'rb'))
 valid_examples=pickle.load(open(valid_pkl, 'rb'))
 
+src_vocab_size = len(field_src.vocab)
 fields = {'text':field_src}
 train = Dataset(examples=train_examples, fields=fields)
 valid = Dataset(examples=valid_examples, fields=fields)
@@ -37,7 +40,6 @@ train_iter = batchify(list(train_iter)[0].text, BATCH_SIZE)
 valid_iter = BucketIterator(valid, batch_size=1, device=device)
 valid_iter = batchify(list(valid_iter)[0].text, BATCH_SIZE)
 
-src_vocab_size = len(field_src.vocab)
 model=TransformerModel(src_vocab_size=src_vocab_size,
                        d_model=D_MODEL,
                        nhead=NHEAD,

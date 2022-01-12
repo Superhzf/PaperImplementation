@@ -1,3 +1,5 @@
+# Modified from
+# https://pytorch.org/tutorials/beginner/translation_transformer.html
 from timeit import default_timer as timer
 from MT_helpers import train_epoch,evaluate
 import pickle
