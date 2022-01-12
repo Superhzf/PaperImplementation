@@ -22,7 +22,7 @@ NLAYERS = 6
 NHEAD = 8
 DROPOUT = 0.1
 EPOCHS_DEV = 1
-EPOCHS_FULL = 10
+EPOCHS_FULL = 1000
 BATCH_SIZE = 100
 """
 SYNC_EVERY_STEPS=160 means that we want to accumulate the gradients every 160
