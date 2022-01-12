@@ -58,6 +58,11 @@ UNK_WORD = '<unk>'
 BOS_WORD = '<s>'
 EOS_WORD = '</s>'
 MAX_LEN = 200
+"""
+Settings for saving the best models
+"""
+SAVE_MODEL_PATH='./data/TrainedModel/'
+NO_BETTER_THAN_ROUND=21
 
 def mkdir_if_needed(dir_name):
     if not os.path.isdir(dir_name):
@@ -178,4 +183,5 @@ def main(DEVELOPMENT_MODE):
 if __name__ == '__main__':
     mkdir_if_needed(DATA_DIR_DEV)
     mkdir_if_needed(DATA_DIR_FULL)
+    mkdir_if_needed(SAVE_MODEL_PATH)
     main(DEVELOPMENT_MODE)
