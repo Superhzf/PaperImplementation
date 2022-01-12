@@ -21,7 +21,6 @@ else:
     EPOCHS=EPOCHS_FULL
     SYNC_EVERY_STEPS=SYNC_EVERY_BATCH_FULL
 
-print("SYNC_EVERY_STEPS",SYNC_EVERY_STEPS)
 vocab_pkl_src=os.path.join(DATA_DIR, SAVE_VOCAB_SRC)
 train_pkl=os.path.join(DATA_DIR, SAVE_DATA_LM_TRAIN)
 valid_pkl=os.path.join(DATA_DIR, SAVE_DATA_LM_VAL)
