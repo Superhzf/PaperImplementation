@@ -231,14 +231,6 @@ class Seq2SeqTransformer(TransformerModel):
         return self.decoder(output)
 
 
-def export_onnx(path, batch_size, seq_len,model):
-    print('The model is also exported in ONNX format at {}'.
-          format(os.path.realpath(path)))
-    model.eval()
-    dummy_input = torch.LongTensor(seq_len * batch_size).zero_().view(-1, batch_size).to(device)
-    dummy_src = generate_square_subsequent_mask(seq_len).to(device)
-    torch.onnx.export(model, (dummy_input,dummy_src), path,opset_version=10)
-
 
 class ScheduledOptim():
     '''
