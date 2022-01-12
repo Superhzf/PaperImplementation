@@ -21,7 +21,6 @@ FFN_HID_DIM = 2048
 NLAYERS = 6
 NHEAD = 8
 DROPOUT = 0.1
-# TOOD: the current value is for development, change EPOCHS=10 and BATCH_SIZE=2048
 EPOCHS_DEV = 1
 EPOCHS_FULL = 10
 BATCH_SIZE = 100
@@ -31,12 +30,14 @@ batches. Why do we want this? Because if we want to set up the BATCH_SIZE=16000,
 then we may not have enough memory to process it, so we set up BATCH_SIZE=100 and
 accumulate the gradients for 160 batches before updating the parameters.
 
+Per the paper, BATCH_SIZE=16000, so BATCH_SIZE*SYNC_EVERY_BATCH_FULL should be
+16000.
+
 Ref:
 https://discuss.pytorch.org/t/why-do-we-need-to-set-the-gradients-manually-to-zero-in-pytorch/4903/20?u=alband
 """
 SYNC_EVERY_BATCH_DEV = 10
 SYNC_EVERY_BATCH_FULL = 160
-# TOOD: the current value is for development, change EPOCHS=10 and BATCH_SIZE=2048
 N_WARMUP_STEPS = 4000
 BETAS = (0.9, 0.98)
 EPS = 1e-9
