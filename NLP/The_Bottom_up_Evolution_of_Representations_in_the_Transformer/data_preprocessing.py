@@ -61,6 +61,9 @@ MAX_LEN = 200
 """
 Settings for saving the best models.
 
+Ref for saving torch models
+https://pytorch.org/tutorials/beginner/saving_loading_models.html
+
 NO_BETTER_THAN_ROUND means that once the model does not improve for
 the next NO_BETTER_THAN_ROUND epochs, the training
 procedure should stop. Per the authors, they monitor the performance on the
