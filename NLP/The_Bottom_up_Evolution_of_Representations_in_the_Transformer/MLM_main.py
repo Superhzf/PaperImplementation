@@ -46,9 +46,9 @@ trg_vocab_size = len(field_trg.vocab)
 
 fields = {'src':field_src , 'trg':field_trg}
 train = Dataset(examples=train_examples, fields=fields)
-train_iter = BucketIterator(train, batch_size=BATCH_SIZE, device=device, train=True)
+train_iter = BucketIterator(train, batch_size=BATCH_SIZE, device=device, train=True, shuffle=False)
 valid = Dataset(examples=valid_examples, fields=fields)
-valid_iter = BucketIterator(valid, batch_size=BATCH_SIZE, device=device)
+valid_iter = BucketIterator(valid, batch_size=BATCH_SIZE, device=device, shuffle=False)
 
 model = TransformerModel(src_vocab_size=src_vocab_size,
                          d_model=D_MODEL,
