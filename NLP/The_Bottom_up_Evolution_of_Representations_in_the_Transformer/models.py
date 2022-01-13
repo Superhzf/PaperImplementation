@@ -129,10 +129,10 @@ class TransformerModel(nn.Module):
                  dropout:float=0.5,
                  initialize_weights:bool=True):
         super().__init__()
+        self.src_tok_emb = nn.Embedding(src_vocab_size, d_model)
         self.pos_encoder = PositionalEncoding(d_model, dropout)
         encoder_layers = TransformerEncoderLayer(d_model, nhead, dim_feedforward, dropout)
         self.transformer_encoder = TransformerEncoder(encoder_layers, num_encoder_layer)
-        self.src_tok_emb = nn.Embedding(src_vocab_size, d_model)
         self.d_model = d_model
         self.decoder = nn.Linear(d_model, src_vocab_size)
         if initialize_weights:
