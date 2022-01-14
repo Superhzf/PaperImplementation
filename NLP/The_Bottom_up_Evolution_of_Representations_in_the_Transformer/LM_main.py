@@ -55,7 +55,7 @@ model=TransformerModel(src_vocab_size=src_vocab_size,
                        dropout=DROPOUT)
 
 model=model.to(device)
-loss_fn=LOSS_FN()
+loss_fn=LOSS_FN(ignore_index=src_pad_idx)
 optimizer=ScheduledOptim(model.parameters())
 best_loss=float('inf')
 best_ppl=None
