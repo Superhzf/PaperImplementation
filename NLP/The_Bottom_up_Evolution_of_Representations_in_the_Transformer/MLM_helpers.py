@@ -23,14 +23,14 @@ def train_epoch(model, dataloader, criterion, ntokens, optimizer, epoch, src_pad
         src = batch.src
         src_seq = src.to(device)
 
-        input = src_seq.permute(1, 0).clone()
-        src_mask = generate_square_subsequent_mask(src_seq.size(1))
-        rand_value = torch.rand(src_seq.permute(1, 0).shape)
+        input = src_seq.clone()
+        src_mask = generate_square_subsequent_mask(src_seq.size(0))
+        rand_value = torch.rand(src_seq.shape)
         rand_mask = (rand_value < 0.15) * (input != src_pad_idx)
         mask_idx=(rand_mask.flatten() == True).nonzero().view(-1)
         input = input.flatten()
         input[mask_idx] = 103
-        input = input.view(src_seq.permute(1, 0).size())
+        input = input.view(src_seq.size())
 
         out = model(input.to(device), src_mask.to(device))
         loss = criterion(out.view(-1, ntokens), src_seq.view(-1).to(device))
