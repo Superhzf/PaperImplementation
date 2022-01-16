@@ -32,7 +32,7 @@ def create_mask(src, tgt, src_pad_idx, trg_pad_idx):
     return src_mask, tgt_mask, src_padding_mask, tgt_padding_mask
 
 
-def train_epoch(model, optimizer, batch_size, loss_fn, train_iter, src_pad_idx, trg_pad_idx, epoch, sync_every_steps):
+def train_epoch(model, optimizer, loss_fn, train_iter, src_pad_idx, trg_pad_idx, epoch, sync_every_steps):
     model.train()
     losses=0
     sync_loss=0
@@ -75,7 +75,7 @@ def train_epoch(model, optimizer, batch_size, loss_fn, train_iter, src_pad_idx, 
 
     return losses / len(train_iter)
 
-def evaluate(model, batch_size, loss_fn, val_iter):
+def evaluate(model, loss_fn, val_iter):
     model.eval()
     losses = 0
     i=0

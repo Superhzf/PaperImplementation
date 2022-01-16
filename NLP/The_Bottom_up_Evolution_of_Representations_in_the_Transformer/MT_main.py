@@ -69,7 +69,7 @@ round=0
 
 for epoch in range(1, EPOCHS+1):
     start_time = timer()
-    train_loss = train_epoch(model, optimizer, BATCH_SIZE, loss_fn, train_iter, src_pad_idx, trg_pad_idx,epoch, SYNC_EVERY_STEPS)
+    train_loss = train_epoch(model, optimizer, loss_fn, train_iter, src_pad_idx, trg_pad_idx,epoch, SYNC_EVERY_STEPS)
     end_time = timer()
     valid_loss = evaluate(model,BATCH_SIZE, loss_fn, valid_iter)
     valid_ppl = math.exp(val_loss)
