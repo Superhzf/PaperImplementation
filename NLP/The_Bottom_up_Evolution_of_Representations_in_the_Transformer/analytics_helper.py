@@ -11,7 +11,7 @@ def MostFreqToken(field_src, N):
     sorted_vocab={k: v for k, v in sorted(field_src.vocab.freqs.items(), key=lambda item: item[1],reverse=True)}
     frequent_vocab=[]
     for count, (this_vocab, freq) in enumerate(sorted_vocab.items()):
-        if count < 1000:
+        if count < N:
             frequent_vocab.append(this_vocab)
         else:
             return frequent_vocab
