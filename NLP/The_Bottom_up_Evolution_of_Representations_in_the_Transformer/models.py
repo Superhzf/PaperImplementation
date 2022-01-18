@@ -56,6 +56,28 @@ def generate_square_subsequent_mask(sz):
     return mask
 
 
+class GetActivation(object):
+    """
+    The is the class version of the nested function
+
+    def get_activation(self, name):
+        def hook(model, input, output):
+            self.activation[name] = output.detach()
+        return hook
+
+    ref:
+    https://stackoverflow.com/questions/12019961/python-pickling-nested-functions
+    https://stackoverflow.com/questions/68852988/how-to-get-output-from-intermediate-encoder-layers-in-pytorch-transformer
+
+    """
+    def __init__(self, name, activation):
+        self.name=name
+        self.activation=activation
+
+    def __call__(self, model, input, output):
+        self.activation[self.name] = output.detach()
+
+
 class PositionalEncoding(nn.Module):
     """
     This class is required because it injects some information about the relative or absolute position of the tokens
@@ -132,9 +154,16 @@ class TransformerModel(nn.Module):
         self.src_tok_emb = nn.Embedding(src_vocab_size, d_model)
         self.pos_encoder = PositionalEncoding(d_model, dropout)
         encoder_layers = TransformerEncoderLayer(d_model, nhead, dim_feedforward, dropout)
-        self.transformer_encoder = TransformerEncoder(encoder_layers, num_encoder_layer)
+        self.num_encoder_layer=num_encoder_layer
+        self.transformer_encoder = TransformerEncoder(encoder_layers, self.num_encoder_layer)
         self.d_model = d_model
         self.decoder = nn.Linear(d_model, src_vocab_size)
+        self.activation={}
+        self.num2word={1:'first',2:'second',3:'third',4:'fourth',5:'fifth',6:'sixth'}
+        for i in range(self.num_encoder_layer):
+            name="{}_layer".format(self.num2word[i+1])
+            self.transformer_encoder.layers[i].register_forward_hook(GetActivation(name, self.activation))
+
         if initialize_weights:
             self.init_weights()
 
@@ -147,10 +176,10 @@ class TransformerModel(nn.Module):
         self.decoder.weight.data.uniform_(-initrange, initrange)
 
     def forward(self, src: Tensor, src_mask: Tensor)->Tensor:
-        src = self.src_tok_emb(src) * math.sqrt(self.d_model)
-        src = self.pos_encoder(src)
-        output = self.transformer_encoder(src, src_mask)
-        output = self.decoder(output)
+        self.src_emb = self.src_tok_emb(src) * math.sqrt(self.d_model)
+        self.src_pe = self.pos_encoder(self.src_emb)
+        self.output_te = self.transformer_encoder(self.src_pe, src_mask)
+        output = self.decoder(self.output_te)
         return output
 
 
