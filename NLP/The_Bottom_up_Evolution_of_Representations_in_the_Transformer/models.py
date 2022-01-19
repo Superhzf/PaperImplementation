@@ -24,6 +24,9 @@ DROPOUT = 0.1
 EPOCHS_DEV = 1
 EPOCHS_FULL = 1000
 BATCH_SIZE = 1000
+LM_NAME='LM.pt'
+MLM_NAME='MLM.pt'
+MT_NAME='MT.pt'
 """
 SYNC_EVERY_STEPS=16 means that we want to accumulate the gradients every 16
 batches. Why do we want this? Because if we want to set up the BATCH_SIZE=16000,

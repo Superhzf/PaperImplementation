@@ -12,6 +12,7 @@ from data_preprocessing import SAVE_MODEL_PATH, NO_BETTER_THAN_ROUND
 from models import D_MODEL, FFN_HID_DIM, NLAYERS, NHEAD, BATCH_SIZE, DROPOUT
 from models import EPOCHS_DEV, EPOCHS_FULL, SYNC_EVERY_BATCH_DEV, SYNC_EVERY_BATCH_FULL
 from models import TransformerModel, LOSS_FN, ScheduledOptim
+from models import MLM_NAME
 import os
 import time
 import math
@@ -81,7 +82,7 @@ for epoch in range(1, EPOCHS + 1):
     else:
         round+=1
         if round>=NO_BETTER_THAN_ROUND:
-            torch.save(best_model, os.path.join(SAVE_MODEL_PATH,"MLM.pt"))
+            torch.save(best_model, os.path.join(SAVE_MODEL_PATH,MLM_NAME))
         break
     print('-' * 89)
     print(f"Epoch: {epoch}|Train loss: {train_loss:.2f}|"
@@ -92,4 +93,4 @@ for epoch in range(1, EPOCHS + 1):
             f"Epoch time = {elapsed:.2f}s")
     print('-' * 89)
 
-print(f"Training is done! The best model has been save to {os.path.join(SAVE_MODEL_PATH,'MLM.pt')}")
+print(f"Training is done! The best model has been save to {os.path.join(SAVE_MODEL_PATH,MLM_NAME)}")
