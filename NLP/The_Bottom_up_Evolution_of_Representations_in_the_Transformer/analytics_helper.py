@@ -1,6 +1,18 @@
 import numpy as np
 from sklearn.metrics import mutual_info_score
 
+"""
+MIN_SAMPLE_SIZE:
+The minimum number of observations needed for each token ID to collect
+before doing the clustering
+
+N_FREQUENT:
+The most N_FREQUENT frequent token IDs will be collected to do clustering
+
+N_CLUSTER:
+The number of clusters that we want cluster token reps into.
+"""
+
 MIN_SAMPLE_SIZE_DEV=30
 MIN_SAMPLE_SIZE_FULL=1000
 
