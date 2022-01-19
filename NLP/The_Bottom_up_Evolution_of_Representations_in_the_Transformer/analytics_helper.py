@@ -1,3 +1,15 @@
+import numpy as np
+from sklearn.metrics import mutual_info_score
+
+MIN_SAMPLE_SIZE_DEV=30
+MIN_SAMPLE_SIZE_FULL=1000
+
+N_FREQUENT_DEV=10
+N_FREQUENT_FULL=1000
+
+N_CLUSTER_DEV=3
+N_CLUSTER_FULL=10000
+
 def MostFreqToken(field_src, N, min_sample_size):
     """
     It will return the ids of the N most frequent sub-words.
@@ -50,6 +62,10 @@ def GetInter(lst1, lst2):
 def GetMI(X, Y, N_X, N_Y):
     """
     Return the mutual information between discrete variables X and Y
+
+    Ref:
+    https://en.wikipedia.org/wiki/Mutual_information
+    https://stackoverflow.com/questions/20491028/optimal-way-to-compute-pairwise-mutual-information-using-numpy
     -----------------------------
     Parameters:
     X: list
