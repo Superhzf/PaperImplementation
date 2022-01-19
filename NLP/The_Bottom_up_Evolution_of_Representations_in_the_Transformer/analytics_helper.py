@@ -45,3 +45,22 @@ def GetInter(lst1, lst2):
         if token_id in lst2:
             result_dict[idx]=token_id
     return result_dict
+
+
+def GetMI(X, Y, N_X, N_Y):
+    """
+    Return the mutual information between discrete variables X and Y
+    -----------------------------
+    Parameters:
+    X: list
+        One of the two discrete variables to calculate MI
+    Y: list
+        One of the two discrete variables to calculate MI
+    N_X: int
+        The number of different classes in X
+    N_Y: int
+        The number of different classes in Y
+    """
+    c_xy = np.histogram2d(X, Y, [N_X, N_Y])[0]
+    mi=mutual_info_score(None, None, contingency=c_xy)
+    return mi
