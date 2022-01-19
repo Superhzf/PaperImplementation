@@ -78,7 +78,7 @@ for token_id, samples in token_reps.items():
         this_df=pd.DataFrame(this_sample,index=[token_id])
         df=df.append(this_df)
 
-kmeans = MiniBatchKMeans(n_clusters=3)
+kmeans = MiniBatchKMeans(n_clusters=N_cluster)
 kmeans.fit(df)
 predictions=kmeans.predict(df)
 X = df.index.values

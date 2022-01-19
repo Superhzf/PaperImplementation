@@ -10,7 +10,7 @@ N_FREQUENT:
 The most N_FREQUENT frequent token IDs will be collected to do clustering
 
 N_CLUSTER:
-The number of clusters that we want cluster token reps into.
+The number of clusters that we want to cluster token reps into.
 """
 
 MIN_SAMPLE_SIZE_DEV=30
