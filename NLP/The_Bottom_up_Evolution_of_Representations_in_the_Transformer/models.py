@@ -27,6 +27,7 @@ BATCH_SIZE = 1000
 LM_NAME='LM.pt'
 MLM_NAME='MLM.pt'
 MT_NAME='MT.pt'
+NUM2WORD={1:'first',2:'second',3:'third',4:'fourth',5:'fifth',6:'sixth'}
 """
 SYNC_EVERY_STEPS=16 means that we want to accumulate the gradients every 16
 batches. Why do we want this? Because if we want to set up the BATCH_SIZE=16000,
@@ -162,9 +163,8 @@ class TransformerModel(nn.Module):
         self.d_model = d_model
         self.decoder = nn.Linear(d_model, src_vocab_size)
         self.activation={}
-        self.num2word={1:'first',2:'second',3:'third',4:'fourth',5:'fifth',6:'sixth'}
         for i in range(self.num_encoder_layer):
-            name="{}_layer".format(self.num2word[i+1])
+            name="{}_layer".format(NUM2WORD[i+1])
             self.transformer_encoder.layers[i].register_forward_hook(GetActivation(name, self.activation))
 
         if initialize_weights:
@@ -226,6 +226,10 @@ class Seq2SeqTransformer(TransformerModel):
                                                  dim_feedforward=dim_feedforward,
                                                  dropout=dropout)
         self.transformer_decoder = TransformerDecoder(decoder_layers, num_decoder_layer)
+        self.activation={}
+        for i in range(self.num_encoder_layer):
+            name="{}_layer".format(NUM2WORD[i+1])
+            self.transformer_encoder.layers[i].register_forward_hook(GetActivation(name, self.activation))
 
         self.init_weights()
 
