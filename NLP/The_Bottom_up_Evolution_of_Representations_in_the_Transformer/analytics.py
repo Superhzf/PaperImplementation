@@ -88,6 +88,10 @@ for batch in train_iter:
                                src_padding_mask=src_padding_mask,
                                tgt_padding_mask=trg_padding_mask,
                                memory_key_padding_mask=src_padding_mask)
+            elif "LM" in this_model_name:
+                src_seq = src_seq[:-1]
+                src_mask = generate_square_subsequent_mask(src_seq.size(0))
+                _ = this_model(src_seq, src_mask.to(device))
             else:
                 src_mask = generate_square_subsequent_mask(src_seq.size(0))
                 _ = this_model(src_seq, src_mask.to(device))
