@@ -79,7 +79,7 @@ for batch in train_iter:
             trg_seq = trg_seq.to(device)
             this_model = torch.load(os.path.join(SAVE_MODEL_PATH,this_model_name))
             this_model.eval()
-            if 'MT' in this_model_name:
+            if this_model_name.startswith("MT"):
                 src_mask, trg_mask, src_padding_mask, trg_padding_mask = create_mask(src_seq, trg_seq, src_pad_idx, trg_pad_idx)
                 _ = this_model(src=src_seq,
                                src_mask=src_mask,
@@ -88,13 +88,17 @@ for batch in train_iter:
                                src_padding_mask=src_padding_mask,
                                tgt_padding_mask=trg_padding_mask,
                                memory_key_padding_mask=src_padding_mask)
-            elif "LM" in this_model_name:
+            elif this_model_name.startswith("MLM"):
+                src_mask = generate_square_subsequent_mask(src_seq.size(0))
+                out = this_model(src_seq, src_mask.to(device))
+                out_label = out.topk(1).indices.squeeze(2)
+            elif this_model_name.startswith("LM"):
                 src_seq = src_seq[:-1]
                 src_mask = generate_square_subsequent_mask(src_seq.size(0))
-                _ = this_model(src_seq, src_mask.to(device))
+                out = this_model(src_seq, src_mask.to(device))
+                out_label = out.topk(1).indices.squeeze(2)
             else:
-                src_mask = generate_square_subsequent_mask(src_seq.size(0))
-                _ = this_model(src_seq, src_mask.to(device))
+                assert 1==0, "The model name is not understood"
             token_reps_list=token_reps_model[this_model_name.split('.')[0]]
             for pos, token_id in target_sample.items():
                 # For a token ID, we only collect min_sample_size reps.
