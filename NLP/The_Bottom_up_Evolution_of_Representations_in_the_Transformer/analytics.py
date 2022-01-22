@@ -81,18 +81,18 @@ for batch in train_iter:
     src = batch.src
     src_seq = src.to(device)
     target_sample=GetInter(src_seq.detach().numpy(), frequent_vocab)
+    trg = batch.trg
+    trg_seq_MT, gold = map(lambda x: x.to(device), patch_trg(trg, trg_pad_idx))
+    trg_seq_MT = trg_seq_MT.to(device)
     if len(target_sample)>0:
         for this_model_name in MODELS_INP:
-            trg = batch.trg
-            trg_seq, gold = map(lambda x: x.to(device), patch_trg(trg, trg_pad_idx))
-            trg_seq = trg_seq.to(device)
             this_model = torch.load(os.path.join(SAVE_MODEL_PATH,this_model_name))
             this_model.eval()
             if this_model_name.startswith("MT"):
-                src_mask, trg_mask, src_padding_mask, trg_padding_mask = create_mask(src_seq, trg_seq, src_pad_idx, trg_pad_idx)
+                src_mask, trg_mask, src_padding_mask, trg_padding_mask = create_mask(src_seq, trg_seq_MT, src_pad_idx, trg_pad_idx)
                 _ = this_model(src=src_seq,
                                src_mask=src_mask,
-                               trg=trg_seq,
+                               trg=trg_seq_MT,
                                tgt_mask=trg_mask,
                                src_padding_mask=src_padding_mask,
                                tgt_padding_mask=trg_padding_mask,
