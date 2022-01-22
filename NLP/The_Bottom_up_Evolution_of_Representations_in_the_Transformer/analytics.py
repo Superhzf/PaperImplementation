@@ -81,9 +81,14 @@ for batch in train_iter:
     src = batch.src
     src_seq = src.to(device)
     target_sample=GetInter(src_seq.detach().numpy(), frequent_vocab)
+
     trg = batch.trg
     trg_seq_MT, gold = map(lambda x: x.to(device), patch_trg(trg, trg_pad_idx))
     trg_seq_MT = trg_seq_MT.to(device)
+
+    trg_seq_LM = src_seq[1:].view(-1).to(device)
+
+    trg_seq_MLM = src_seq
     if len(target_sample)>0:
         for this_model_name in MODELS_INP:
             this_model = torch.load(os.path.join(SAVE_MODEL_PATH,this_model_name))
