@@ -1,5 +1,7 @@
+from sklearn.cluster import MiniBatchKMeans
 import numpy as np
 from sklearn.metrics import mutual_info_score
+import pandas as pd
 
 """
 MIN_SAMPLE_SIZE:
@@ -71,24 +73,78 @@ def GetInter(lst1, lst2):
     return result_dict
 
 
-def GetMI(X, Y, N_X, N_Y):
+def GetMI(token_reps_list, N_frequent, N_cluster, num_layers, result_list):
     """
-    Return the mutual information between discrete variables X and Y
+    Return the mutual information between input/output tokens and the intermediate
+    layer values.
 
     Ref:
     https://en.wikipedia.org/wiki/Mutual_information
     https://stackoverflow.com/questions/20491028/optimal-way-to-compute-pairwise-mutual-information-using-numpy
     -----------------------------
     Parameters:
-    X: list
-        One of the two discrete variables to calculate MI
-    Y: list
-        One of the two discrete variables to calculate MI
+    token_reps_list: list
+        token_reps_list[i]=dict saves the reps of layer i. The format is
+        dict[token_id]=reps
     N_X: int
         The number of different classes in X
     N_Y: int
         The number of different classes in Y
+    num_layers: int
+        The number of intermediate layers
+    N_cluster: int
+        The number of clusters that we want to cluster reps into
+    result_list: list
+        Where to save the result
     """
-    c_xy = np.histogram2d(X, Y, [N_X, N_Y])[0]
-    mi=mutual_info_score(None, None, contingency=c_xy)
-    return mi
+    for i in range(num_layers):
+        df=pd.DataFrame()
+        this_token_reps=token_reps_list[i]
+        for token_id, samples in this_token_reps.items():
+            for this_sample in samples:
+                this_df=pd.DataFrame(this_sample,index=[token_id])
+                df=df.append(this_df)
+
+        kmeans = MiniBatchKMeans(n_clusters=N_cluster)
+        kmeans.fit(df)
+        predictions=kmeans.predict(df)
+        X = df.index.values
+        Y = predictions.tolist()
+        assert len(X)==len(Y), "the length of X and Y should be the same"
+        c_xy = np.histogram2d(X, Y, [N_frequent, N_cluster])[0]
+        this_MI=mutual_info_score(None, None, contingency=c_xy)
+        result_list.append(this_MI)
+
+
+def GetInterValues(this_model, target_sample, NUM2WORD, token_reps_list, sample_size_dict, min_sample_size, num_layers):
+    """
+    The function extracts the intermediate layer values of this_model of some
+    token ids. Then update this_token_resp in place and return sample_size_dict.
+    -------------------------------------
+    Parameters:
+    this_model: Pytorch model
+        This is the model from which we would extract intermediate values
+    target_sample: list
+        This includes the token ids that interest us
+    NUM2WORD: dict
+        NUM2WORD translates from layer number to layer name
+    this_token_resp: dict
+        It saves the reps of tokens for one of the models (ML, MLM, MT). The format
+        is this_token_resp[id]=reps.
+    sample_size_dict: dic
+        It saves how many samples we have collected for a token id. The format
+        is sample_size_dict[id]=count.
+    min_sample_size: int
+        The minimum required sample size needed for a token id
+    num_layers: int
+        The number of intermediate layers
+    """
+    for pos, token_id in target_sample.items():
+        # For a token ID, we only collect min_sample_size reps.
+        # the length of all dicts in token_reps_list is the same, we can use the first onex
+        if len(token_reps_list[0][token_id])<min_sample_size:
+            for i in range(num_layers):
+                this_token_resp=token_reps_list[i]
+                this_token_resp[token_id].append(this_model.activation[f'{NUM2WORD[i+1]}_layer'][pos].detach().numpy())
+                sample_size_dict[token_id]+=1
+    return sample_size_dict
