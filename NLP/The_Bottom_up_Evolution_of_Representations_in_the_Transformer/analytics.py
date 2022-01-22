@@ -80,16 +80,18 @@ for this_token_id in frequent_vocab:
 for batch in train_iter:
     src = batch.src
     src_seq = src.to(device)
-    target_sample=GetInter(src_seq.detach().numpy(), frequent_vocab)
+    target_sample_INP=GetInter(src_seq.detach().numpy(), frequent_vocab)
 
     trg = batch.trg
     trg_seq_MT, gold = map(lambda x: x.to(device), patch_trg(trg, trg_pad_idx))
     trg_seq_MT = trg_seq_MT.to(device)
 
-    trg_seq_LM = src_seq[1:].view(-1).to(device)
+    trg_seq_LM = src_seq[1:].to(device)
+    target_sample_OUT_LM=GetInter(trg_seq_LM.detach().numpy(), frequent_vocab)
 
     trg_seq_MLM = src_seq
-    if len(target_sample)>0:
+    target_sample_OUT_MLM=GetInter(trg_seq_MLM.detach().numpy(), frequent_vocab)
+    if len(target_sample_INP)>0:
         for this_model_name in MODELS_INP:
             this_model = torch.load(os.path.join(SAVE_MODEL_PATH,this_model_name))
             this_model.eval()
@@ -103,12 +105,12 @@ for batch in train_iter:
                                tgt_padding_mask=trg_padding_mask,
                                memory_key_padding_mask=src_padding_mask)
                 token_reps_list=token_reps_model[MT_NAME.split('.')[0]]
-                sample_size_dict=GetInterValues(this_model, target_sample, NUM2WORD, token_reps_list, sample_size_dict, min_sample_size, NLAYERS)
+                sample_size_dict=GetInterValues(this_model, target_sample_INP, NUM2WORD, token_reps_list, sample_size_dict, min_sample_size, NLAYERS)
             elif this_model_name.startswith("MLM"):
                 src_mask = generate_square_subsequent_mask(src_seq.size(0))
                 _ = this_model(src_seq, src_mask.to(device))
                 token_reps_list=token_reps_model[f"{MLM_NAME.split('.')[0]}_SAME"]
-                sample_size_dict=GetInterValues(this_model, target_sample, NUM2WORD, token_reps_list, sample_size_dict, min_sample_size, NLAYERS)
+                sample_size_dict=GetInterValues(this_model, target_sample_INP, NUM2WORD, token_reps_list, sample_size_dict, min_sample_size, NLAYERS)
 
                 input = src_seq.clone()
                 src_mask = generate_square_subsequent_mask(src_seq.size(0))
@@ -120,13 +122,13 @@ for batch in train_iter:
                 input = input.view(src_seq.size())
                 _ = this_model(input.to(device), src_mask.to(device))
                 token_reps_list=token_reps_model[f"{MLM_NAME.split('.')[0]}_DIFF"]
-                sample_size_dict=GetInterValues(this_model, target_sample, NUM2WORD, token_reps_list, sample_size_dict, min_sample_size, NLAYERS)
+                sample_size_dict=GetInterValues(this_model, target_sample_INP, NUM2WORD, token_reps_list, sample_size_dict, min_sample_size, NLAYERS)
             elif this_model_name.startswith("LM"):
                 src_seq = src_seq[:-1]
                 src_mask = generate_square_subsequent_mask(src_seq.size(0))
                 _ = this_model(src_seq, src_mask.to(device))
                 token_reps_list=token_reps_model[LM_NAME.split('.')[0]]
-                sample_size_dict=GetInterValues(this_model, target_sample, NUM2WORD, token_reps_list, sample_size_dict, min_sample_size, NLAYERS)
+                sample_size_dict=GetInterValues(this_model, target_sample_INP, NUM2WORD, token_reps_list, sample_size_dict, min_sample_size, NLAYERS)
             else:
                 assert 1==0, "The model name is not understood"
 
