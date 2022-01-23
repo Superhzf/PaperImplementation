@@ -141,10 +141,9 @@ def GetInterValues(this_model, target_sample, NUM2WORD, token_reps_list, sample_
     """
     for pos, token_id in target_sample.items():
         # For a token ID, we only collect min_sample_size reps.
-        # the length of all dicts in token_reps_list is the same, we can use the first onex
+        # the length of all dicts in token_reps_list is the same, we can use the first one
         if len(token_reps_list[0][token_id])<min_sample_size:
             for i in range(num_layers):
                 this_token_resp=token_reps_list[i]
                 this_token_resp[token_id].append(this_model.activation[f'{NUM2WORD[i+1]}_layer'][pos].detach().numpy())
                 sample_size_dict[token_id]+=1
-    return sample_size_dict

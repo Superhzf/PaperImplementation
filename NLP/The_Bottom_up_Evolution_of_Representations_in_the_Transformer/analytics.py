@@ -42,7 +42,6 @@ MI_results_OUT={LM_NAME.split('.')[0]:[],
          MLM_NAME.split('.')[0]:[]}
 
 MODELS_INP=[LM_NAME, MLM_NAME, MT_NAME]
-MODELS_OUT=[LM_NAME, MLM_NAME]
 
 vocab_pkl_src = os.path.join(data_dir, SAVE_VOCAB_SRC)
 vocab_pkl_trg = os.path.join(data_dir, SAVE_VOCAB_TRG)
@@ -59,7 +58,8 @@ frequent_vocab = MostFreqToken(field_src, N_frequent, min_sample_size)
 
 # token_reps_list saves NLAYERS dicts, for ith dict, the key is the token ID,
 # the value is the representation of the ID in the ith layer.
-token_reps_model={}
+token_reps_model_INP={}
+token_reps_model_OUT={}
 for this_model_name in MODELS_INP:
     token_reps_list=[]
     for _ in range(NLAYERS):
@@ -68,19 +68,65 @@ for this_model_name in MODELS_INP:
             this_token_reps[this_token_id]=[]
         token_reps_list.append(this_token_reps)
     if this_model_name.startswith("MLM"):
-        token_reps_model[f"{MLM_NAME.split('.')[0]}_SAME"]=token_reps_list
-        token_reps_model[f"{MLM_NAME.split('.')[0]}_DIFF"]=token_reps_list
-    else:
-        token_reps_model[this_model_name.split('.')[0]]=token_reps_list
+        token_reps_model_INP[f"{MLM_NAME.split('.')[0]}_SAME"]=token_reps_list
+        token_reps_model_INP[f"{MLM_NAME.split('.')[0]}_DIFF"]=token_reps_list
+        token_reps_model_OUT[this_model_name.split('.')[0]]=token_reps_list
+    elif this_model_name.startswith("LM"):
+        token_reps_model_INP[this_model_name.split('.')[0]]=token_reps_list
+        token_reps_model_OUT[this_model_name.split('.')[0]]=token_reps_list
+    elif this_model_name.startswith("MT"):
+        token_reps_model_INP[this_model_name.split('.')[0]]=token_reps_list
 
-sample_size_dict={}
-for this_token_id in frequent_vocab:
-    sample_size_dict[this_token_id]=0
+sample_size_dict_INP={}
+sample_size_dict_OUT={}
+for this_model_name in MODELS_INP:
+    if this_model_name.startswith("MLM"):
+        this_sample_size_dict_INP_SAME={}
+        this_sample_size_dict_INP_DIFF={}
+        this_sample_size_dict_OUT={}
+        for this_token_id in frequent_vocab:
+            this_sample_size_dict_INP_SAME[this_token_id]=0
+            this_sample_size_dict_INP_DIFF[this_token_id]=0
+            this_sample_size_dict_OUT[this_token_id]=0
+        sample_size_dict_INP[f"{this_model_name.split('.')[0]}_SAME"]=this_sample_size_dict_INP_SAME
+        sample_size_dict_INP[f"{this_model_name.split('.')[0]}_DIFF"]=this_sample_size_dict_INP_DIFF
+        sample_size_dict_OUT[this_model_name.split('.')[0]]=this_sample_size_dict_OUT
+    elif this_model_name.startswith("LM"):
+        this_sample_size_dict_INP={}
+        this_sample_size_dict_OUT={}
+        for this_token_id in frequent_vocab:
+            this_sample_size_dict_INP[this_token_id]=0
+            this_sample_size_dict_OUT[this_token_id]=0
+        sample_size_dict_INP[this_model_name.split('.')[0]]=this_sample_size_dict_INP
+        sample_size_dict_OUT[this_model_name.split('.')[0]]=this_sample_size_dict_OUT
+    if this_model_name.startswith("MT"):
+        this_sample_size_dict_INP={}
+        for this_token_id in frequent_vocab:
+            this_sample_size_dict_INP[this_token_id]=0
+        sample_size_dict_INP[this_model_name.split('.')[0]]=this_sample_size_dict_INP
+
+
 
 for batch in train_iter:
-    src = batch.src
-    src_seq = src.to(device)
-    target_sample_INP=GetInter(src_seq.detach().numpy(), frequent_vocab)
+    src_seq_MT = batch.src.to(device)
+    target_sample_INP_MT=GetInter(src_seq_MT.detach().numpy(), frequent_vocab)
+
+    src_seq_MLM_SAME = batch.src.to(device)
+    target_sample_INP_MLM_SAME=GetInter(src_seq_MLM_SAME.detach().numpy(), frequent_vocab)
+
+    src_seq=batch.src.to(device)
+    src_seq_MLM_DIFF = src_seq.clone()
+    src_mask = generate_square_subsequent_mask(src_seq.size(0))
+    rand_value = torch.rand(src_seq.shape)
+    rand_mask = (rand_value < 0.15) * (input != src_pad_idx)
+    mask_idx=(rand_mask.flatten() == True).nonzero().view(-1)
+    src_seq_MLM_DIFF = src_seq_MLM_DIFF.flatten()
+    src_seq_MLM_DIFF[mask_idx] = 103
+    src_seq_MLM_DIFF = src_seq_MLM_DIFF.view(src_seq.size())
+    target_sample_INP_MLM_DIFF=GetInter(src_seq_MLM_DIFF.detach().numpy(), frequent_vocab)
+
+    src_seq_LM = batch.src[:-1]
+    target_sample_INP_LM=GetInter(src_seq_LM.detach().numpy(), frequent_vocab)
 
     trg = batch.trg
     trg_seq_MT, gold = map(lambda x: x.to(device), patch_trg(trg, trg_pad_idx))
@@ -91,70 +137,115 @@ for batch in train_iter:
 
     trg_seq_MLM = src_seq
     target_sample_OUT_MLM=GetInter(trg_seq_MLM.detach().numpy(), frequent_vocab)
-    if len(target_sample_INP)>0:
-        for this_model_name in MODELS_INP:
-            this_model = torch.load(os.path.join(SAVE_MODEL_PATH,this_model_name))
-            this_model.eval()
-            if this_model_name.startswith("MT"):
-                src_mask, trg_mask, src_padding_mask, trg_padding_mask = create_mask(src_seq, trg_seq_MT, src_pad_idx, trg_pad_idx)
-                _ = this_model(src=src_seq,
-                               src_mask=src_mask,
-                               trg=trg_seq_MT,
-                               tgt_mask=trg_mask,
-                               src_padding_mask=src_padding_mask,
-                               tgt_padding_mask=trg_padding_mask,
-                               memory_key_padding_mask=src_padding_mask)
-                token_reps_list=token_reps_model[MT_NAME.split('.')[0]]
-                sample_size_dict=GetInterValues(this_model, target_sample_INP, NUM2WORD, token_reps_list, sample_size_dict, min_sample_size, NLAYERS)
-            elif this_model_name.startswith("MLM"):
-                src_mask = generate_square_subsequent_mask(src_seq.size(0))
-                _ = this_model(src_seq, src_mask.to(device))
-                token_reps_list=token_reps_model[f"{MLM_NAME.split('.')[0]}_SAME"]
-                sample_size_dict=GetInterValues(this_model, target_sample_INP, NUM2WORD, token_reps_list, sample_size_dict, min_sample_size, NLAYERS)
 
-                input = src_seq.clone()
-                src_mask = generate_square_subsequent_mask(src_seq.size(0))
-                rand_value = torch.rand(src_seq.shape)
-                rand_mask = (rand_value < 0.15) * (input != src_pad_idx)
-                mask_idx=(rand_mask.flatten() == True).nonzero().view(-1)
-                input = input.flatten()
-                input[mask_idx] = 103
-                input = input.view(src_seq.size())
-                _ = this_model(input.to(device), src_mask.to(device))
-                token_reps_list=token_reps_model[f"{MLM_NAME.split('.')[0]}_DIFF"]
-                sample_size_dict=GetInterValues(this_model, target_sample_INP, NUM2WORD, token_reps_list, sample_size_dict, min_sample_size, NLAYERS)
-            elif this_model_name.startswith("LM"):
-                src_seq = src_seq[:-1]
-                src_mask = generate_square_subsequent_mask(src_seq.size(0))
-                _ = this_model(src_seq, src_mask.to(device))
-                token_reps_list=token_reps_model[LM_NAME.split('.')[0]]
-                sample_size_dict=GetInterValues(this_model, target_sample_INP, NUM2WORD, token_reps_list, sample_size_dict, min_sample_size, NLAYERS)
-            else:
-                assert 1==0, "The model name is not understood"
+    for this_model_name in MODELS_INP:
+        this_model = torch.load(os.path.join(SAVE_MODEL_PATH,this_model_name))
+        this_model.eval()
+        if this_model_name.startswith("MT") and len(target_sample_INP_MT)>0:
+            src_mask, trg_mask, src_padding_mask, trg_padding_mask = create_mask(src_seq_MT, trg_seq_MT, src_pad_idx, trg_pad_idx)
+            _ = this_model(src=src_seq_MT,
+                           src_mask=src_mask,
+                           trg=trg_seq_MT,
+                           tgt_mask=trg_mask,
+                           src_padding_mask=src_padding_mask,
+                           tgt_padding_mask=trg_padding_mask,
+                           memory_key_padding_mask=src_padding_mask)
+            token_reps_list=token_reps_model_INP[MT_NAME.split('.')[0]]
+            this_sample_size_dict=sample_size_dict_INP[this_model_name.split('.')[0]]
+            GetInterValues(this_model, target_sample_INP_MT, NUM2WORD, token_reps_list, this_sample_size_dict, min_sample_size, NLAYERS)
+        elif this_model_name.startswith("MLM"):
+            if len(target_sample_INP_MLM_SAME)>0:
+                src_mask = generate_square_subsequent_mask(src_seq_MLM_SAME.size(0))
+                _ = this_model(src_seq_MLM_SAME, src_mask.to(device))
+                token_reps_list=token_reps_model_INP[f"{MLM_NAME.split('.')[0]}_SAME"]
+                this_sample_size_dict=sample_size_dict_INP[f"{this_model_name.split('.')[0]}_SAME"]
+                GetInterValues(this_model, target_sample_INP_MLM_SAME, NUM2WORD, token_reps_list, this_sample_size_dict, min_sample_size, NLAYERS)
 
-        this_min_sample_size=float('inf')
-        for key, value in sample_size_dict.items():
-            if value<this_min_sample_size:
-                this_min_sample_size=value
-    # If we have collected MIN_SAMPLE_SIZE reps for each token ID, then break
-    # the length of all dicts in token_reps_list is the same, we can use the first one
-    if this_min_sample_size>=min_sample_size and len(token_reps_list[0])>=N_frequent:
+            if len(target_sample_INP_MLM_DIFF)>0 and len(target_sample_OUT_MLM)>0:
+                src_mask = generate_square_subsequent_mask(src_seq_MLM_DIFF.size(0))
+                _ = this_model(src_seq_MLM_DIFF.to(device), src_mask.to(device))
+                token_reps_list_INP=token_reps_model_INP[f"{MLM_NAME.split('.')[0]}_DIFF"]
+                this_sample_size_dict_INP=sample_size_dict_INP[f"{this_model_name.split('.')[0]}_DIFF"]
+
+                token_reps_list_OUT=token_reps_model_OUT[MLM_NAME.split('.')[0]]
+                this_sample_size_dict_OUT=sample_size_dict_OUT[this_model_name.split('.')[0]]
+
+                GetInterValues(this_model, target_sample_INP_MLM_DIFF, NUM2WORD, token_reps_list_INP, this_sample_size_dict_INP, min_sample_size, NLAYERS)
+                GetInterValues(this_model, target_sample_OUT_MLM, NUM2WORD, token_reps_list_OUT, this_sample_size_dict_OUT, min_sample_size, NLAYERS)
+        elif this_model_name.startswith("LM") and len(target_sample_INP_LM)>0 and len(target_sample_OUT_LM)>0:
+            src_mask = generate_square_subsequent_mask(src_seq_LM.size(0))
+            _ = this_model(src_seq_LM, src_mask.to(device))
+            token_reps_list_INP=token_reps_model_INP[LM_NAME.split('.')[0]]
+            token_reps_list_OUT=token_reps_model_OUT[LM_NAME.split('.')[0]]
+
+            this_sample_size_dict_INP=sample_size_dict_INP[this_model_name.split('.')[0]]
+            this_sample_size_dict_OUT=sample_size_dict_OUT[this_model_name.split('.')[0]]
+
+            GetInterValues(this_model, target_sample_INP_LM, NUM2WORD, token_reps_list_INP, this_sample_size_dict_INP, min_sample_size, NLAYERS)
+            GetInterValues(this_model, target_sample_OUT_LM, NUM2WORD, token_reps_list_OUT, this_sample_size_dict_OUT, min_sample_size, NLAYERS)
+
+
+    # we only need to keep the minimum sample size that has been collected
+    this_min_sample_size_inp=float('inf')
+    this_min_sample_size_out=float('inf')
+
+    for model_name, this_sample_size_dict in sample_size_dict_INP.items():
+        for token_id, size in this_sample_size_dict.items():
+            if size<this_min_sample_size_inp:
+                this_min_sample_size_inp=size
+
+    for model_name, this_sample_size_dict in sample_size_dict_OUT.items():
+        for token_id, size in this_sample_size_dict.items():
+            if size<this_min_sample_size_out:
+                this_min_sample_size_out=size
+
+    is_enough=True
+    if this_min_sample_size_inp>=min_sample_size and this_min_sample_size_out>=min_sample_size:
+        for model_name, reps_dict in token_reps_model_INP.items():
+            if len(reps_dict)<N_frequent:
+                is_enough=False
+                break
+        for model_name, reps_list in token_reps_model_OUT.items():
+            if len(reps_dict)<N_frequent:
+                is_enough=False
+                break
+    else:
+        is_enough=False
+    if is_enough:
         break
+
+if is_enough is False:
+    assert 1==0, "We have not collected enough data!"
 
 for this_model_name in MODELS_INP:
     if this_model_name.startswith("MLM"):
-        token_reps_list=token_reps_model[f"{MLM_NAME.split('.')[0]}_SAME"]
+        token_reps_list=token_reps_model_INP[f"{MLM_NAME.split('.')[0]}_SAME"]
         result_list=MI_results_INP[f"{MLM_NAME.split('.')[0]}_SAME"]
         GetMI(token_reps_list, N_frequent, N_cluster, NLAYERS, result_list)
 
-        token_reps_list=token_reps_model[f"{MLM_NAME.split('.')[0]}_DIFF"]
+        token_reps_list=token_reps_model_INP[f"{MLM_NAME.split('.')[0]}_DIFF"]
         result_list=MI_results_INP[f"{MLM_NAME.split('.')[0]}_DIFF"]
         GetMI(token_reps_list, N_frequent, N_cluster, NLAYERS, result_list)
 
-    else:
-        token_reps_list=token_reps_model[this_model_name.split('.')[0]]
+        token_reps_list=token_reps_model_OUT[MLM_NAME.split('.')[0]]
+        result_list=MI_results_OUT[MLM_NAME.split('.')[0]]
+        GetMI(token_reps_list, N_frequent, N_cluster, NLAYERS, result_list)
+
+    elif this_model_name.startswith("MT"):
+        token_reps_list=token_reps_model_INP[this_model_name.split('.')[0]]
         result_list=MI_results_INP[this_model_name.split('.')[0]]
         GetMI(token_reps_list, N_frequent, N_cluster, NLAYERS, result_list)
 
+    elif this_model_name.startswith("LM"):
+        token_reps_list=token_reps_model_INP[this_model_name.split('.')[0]]
+        result_list=MI_results_INP[this_model_name.split('.')[0]]
+        GetMI(token_reps_list, N_frequent, N_cluster, NLAYERS, result_list)
+
+        token_reps_list=token_reps_model_OUT[MLM_NAME.split('.')[0]]
+        result_list=MI_results_OUT[this_model_name.split('.')[0]]
+        GetMI(token_reps_list, N_frequent, N_cluster, NLAYERS, result_list)
+
+
 
 print("result",MI_results_INP)
+print("result",MI_results_OUT)
