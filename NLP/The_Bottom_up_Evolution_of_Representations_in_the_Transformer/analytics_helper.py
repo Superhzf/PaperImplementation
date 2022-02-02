@@ -147,3 +147,14 @@ def GetInterValues(this_model, target_sample, NUM2WORD, token_reps_list, sample_
                 this_token_resp=token_reps_list[i]
                 this_token_resp[token_id].append(this_model.activation[f'{NUM2WORD[i+1]}_layer'][pos].detach().numpy())
                 sample_size_dict[token_id]+=1
+
+
+def GetInterValuesCCA(this_model, NUM2WORD, matrix,layer_idx):
+    """
+    The function extracts the intermediate layer values of this_model of all
+    tokens. 
+    """
+    this_sen_rep=this_model.activation[f'{NUM2WORD[layer_idx+1]}_layer'].detach().numpy()
+    this_sen_rep=np.squeeze(this_sen_rep,1)
+    matrix.append(this_sen_rep)
+    return matrix
