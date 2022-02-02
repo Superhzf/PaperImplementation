@@ -132,4 +132,5 @@ for batch in train_iter:
 print("Matrix_MT.shape",Matrix_MT.shape)
 print("Matrix_MLM.shape",Matrix_MLM.shape)
 print("Matrix_LM.shape",Matrix_LM.shape)
-print("succeed calculating PWCCA?", compute_pwcca(Matrix_MT[0].transpose(),Matrix_MLM[0].transpose())[2])
+for i in range(NLAYERS):
+    print(f"succeed calculating PWCCA in layer {i}", compute_pwcca(Matrix_MT[i].transpose(),Matrix_MLM[i].transpose())[0])
