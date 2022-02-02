@@ -82,9 +82,9 @@ for batch in train_iter:
                 this_Matrix_MT=[]
             for i in range(NLAYERS):
                 if count_sentence>=1:
-                    this_Matrix_MT=GetInterValuesCCA(this_model, NUM2WORD, this_Matrix_MT, i)
+                    this_Matrix_MT=GetInterValuesCCA(this_model, NUM2WORD, this_Matrix_MT, i, False)
                 else:
-                    Matrix_MT=GetInterValuesCCA(this_model, NUM2WORD, Matrix_MT, i)
+                    Matrix_MT=GetInterValuesCCA(this_model, NUM2WORD, Matrix_MT, i, False)
                     if len(Matrix_MT)>=NLAYERS:
                         Matrix_MT=np.array(Matrix_MT)
 
@@ -98,9 +98,9 @@ for batch in train_iter:
                 this_Matrix_MLM=[]
             for i in range(NLAYERS):
                 if count_sentence>=1:
-                    this_Matrix_MLM=GetInterValuesCCA(this_model, NUM2WORD, this_Matrix_MLM, i)
+                    this_Matrix_MLM=GetInterValuesCCA(this_model, NUM2WORD, this_Matrix_MLM, i, False)
                 else:
-                    Matrix_MLM=GetInterValuesCCA(this_model, NUM2WORD, Matrix_MLM, i)
+                    Matrix_MLM=GetInterValuesCCA(this_model, NUM2WORD, Matrix_MLM, i, False)
                     if len(Matrix_MLM)>=NLAYERS:
                         Matrix_MLM=np.array(Matrix_MLM)
 
@@ -114,9 +114,9 @@ for batch in train_iter:
                 this_Matrix_LM=[]
             for i in range(NLAYERS):
                 if count_sentence>=1:
-                    this_Matrix_LM=GetInterValuesCCA(this_model, NUM2WORD, this_Matrix_LM, i)
+                    this_Matrix_LM=GetInterValuesCCA(this_model, NUM2WORD, this_Matrix_LM, i, True)
                 else:
-                    Matrix_LM=GetInterValuesCCA(this_model, NUM2WORD, Matrix_LM, i)
+                    Matrix_LM=GetInterValuesCCA(this_model, NUM2WORD, Matrix_LM, i, True)
                     if len(Matrix_LM)>=NLAYERS:
                         Matrix_LM=np.array(Matrix_LM)
 
