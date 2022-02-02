@@ -18,6 +18,7 @@ from models import TransformerModel, Seq2SeqTransformer, generate_square_subsequ
 from models import LM_NAME, MLM_NAME, MT_NAME, NUM2WORD, NLAYERS
 import numpy as np
 from analytics_helper import GetInterValuesCCA, MAXIMUM_SENTENCE_COUNT_DEV, MAXIMUM_SENTENCE_COUNT_FULL
+from svcca.pwcca import compute_pwcca
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -131,3 +132,4 @@ for batch in train_iter:
 print("Matrix_MT.shape",Matrix_MT.shape)
 print("Matrix_MLM.shape",Matrix_MLM.shape)
 print("Matrix_LM.shape",Matrix_LM.shape)
+print("succeed calculating PWCCA?", compute_pwcca(Matrix_MT[0].transpose(),Matrix_MLM[0].transpose())[2])
