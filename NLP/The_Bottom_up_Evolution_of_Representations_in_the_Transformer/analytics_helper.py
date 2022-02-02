@@ -24,6 +24,9 @@ N_FREQUENT_FULL=1000
 N_CLUSTER_DEV=3
 N_CLUSTER_FULL=10000
 
+MAXIMUM_SENTENCE_COUNT_DEV=50
+MAXIMUM_SENTENCE_COUNT_FULL=5000
+
 def MostFreqToken(field_src, N, min_sample_size):
     """
     It will return the ids of the N most frequent sub-words.
@@ -152,7 +155,7 @@ def GetInterValues(this_model, target_sample, NUM2WORD, token_reps_list, sample_
 def GetInterValuesCCA(this_model, NUM2WORD, matrix,layer_idx):
     """
     The function extracts the intermediate layer values of this_model of all
-    tokens. 
+    tokens.
     """
     this_sen_rep=this_model.activation[f'{NUM2WORD[layer_idx+1]}_layer'].detach().numpy()
     this_sen_rep=np.squeeze(this_sen_rep,1)
