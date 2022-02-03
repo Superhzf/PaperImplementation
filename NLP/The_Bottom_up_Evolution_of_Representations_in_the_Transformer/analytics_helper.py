@@ -13,6 +13,10 @@ The most N_FREQUENT frequent token IDs will be collected to do clustering
 
 N_CLUSTER:
 The number of clusters that we want to cluster token reps into.
+
+UPPERBOUND_LIST and LOWERBOUND_LIST:
+The range of frequency of target ids should show up in the material. The ith position
+in UPPERBOUND_LIST corresponds to the ith position in LOWERBOUND_LIST.
 """
 
 MIN_SAMPLE_SIZE_DEV=30
@@ -26,6 +30,12 @@ N_CLUSTER_FULL=10000
 
 MAXIMUM_SENTENCE_COUNT_DEV=50
 MAXIMUM_SENTENCE_COUNT_FULL=5000
+
+UPPERBOUND_LIST_FULL=[10,25,50,100,250,500,1000,2500,5000,10000,30000]
+LOWERBOUND_LIST_FULL=[1,10,25,50,100,250,500,1000,2500,5000,10000]
+
+UPPERBOUND_LIST_DEV=[100]
+LOWERBOUND_LIST_DEV=[10]
 
 def MostFreqToken(field_src, N, min_sample_size):
     """
@@ -49,6 +59,39 @@ def MostFreqToken(field_src, N, min_sample_size):
         else:
             break
         assert freq >= min_sample_size, "The number of frequency should be larger than the minimum required sample size"
+    for this_vocab in frequent_vocab:
+        frequent_ids.append(field_src.vocab.stoi[this_vocab])
+    return frequent_ids
+
+
+def NFreqToken(field_src, lower_bound, upper_bound):
+    """
+    It will return the ids of tokens whose frequency is between lower_bound and
+    upper_bound.
+    ----------------------
+    Parameters:
+
+    field_src: torchtext.legacy.data.Field
+        This is the vocab class by Pytorch
+    lower_bound: int
+        The lower bound of the frequency range
+    upper_bound: int
+        The upper bound of the frequency range
+
+    Returns:
+    frequent_ids: list
+        A list of ids of tokens whose frequency is between the lower bound and
+        the upper bound.
+    """
+    sorted_vocab={k: v for k, v in sorted(field_src.vocab.freqs.items(), key=lambda item: item[1],reverse=True)}
+    frequent_vocab=[]
+    frequent_ids=[]
+    for this_vocab, freq in sorted_vocab.items():
+        if freq < lower_bound or freq > upper_bound:
+            continue
+        else:
+            frequent_vocab.append(this_vocab)
+
     for this_vocab in frequent_vocab:
         frequent_ids.append(field_src.vocab.stoi[this_vocab])
     return frequent_ids
