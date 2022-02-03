@@ -55,15 +55,7 @@ for batch in train_iter:
     trg_seq_MT, gold = map(lambda x: x.to(device), patch_trg(trg, trg_pad_idx))
     trg_seq_MT = trg_seq_MT.to(device)
 
-    src_seq=batch.src.to(device)
-    src_seq_MLM_DIFF = src_seq.clone()
-    src_mask = generate_square_subsequent_mask(src_seq.size(0))
-    rand_value = torch.rand(src_seq.shape)
-    rand_mask = (rand_value < 0.15) * (input != src_pad_idx)
-    mask_idx=(rand_mask.flatten() == True).nonzero().view(-1)
-    src_seq_MLM_DIFF = src_seq_MLM_DIFF.flatten()
-    src_seq_MLM_DIFF[mask_idx] = 103
-    src_seq_MLM_DIFF = src_seq_MLM_DIFF.view(src_seq.size())
+    src_seq_MLM_SAME = batch.src.to(device)
 
     src_seq_LM = batch.src[:-1]
 
@@ -93,8 +85,8 @@ for batch in train_iter:
                 this_Matrix_MT=np.array(this_Matrix_MT)
                 Matrix_MT=np.concatenate((Matrix_MT,this_Matrix_MT),axis=1)
         elif this_model_name.startswith("MLM"):
-            src_mask = generate_square_subsequent_mask(src_seq_MLM_DIFF.size(0))
-            _ = this_model(src_seq_MLM_DIFF, src_mask.to(device))
+            src_mask = generate_square_subsequent_mask(src_seq_MLM_SAME.size(0))
+            _ = this_model(src_seq_MLM_SAME, src_mask.to(device))
             if count_sentence>=1:
                 this_Matrix_MLM=[]
             for i in range(NLAYERS):
@@ -133,4 +125,6 @@ print("Matrix_MT.shape",Matrix_MT.shape)
 print("Matrix_MLM.shape",Matrix_MLM.shape)
 print("Matrix_LM.shape",Matrix_LM.shape)
 for i in range(NLAYERS):
-    print(f"succeed calculating PWCCA in layer {i}", compute_pwcca(Matrix_MT[i].transpose(),Matrix_MLM[i].transpose())[0])
+    print(f"PWCCA between MT and MLM in layer {i+1}", compute_pwcca(Matrix_MT[i].transpose(),Matrix_MLM[i].transpose())[0])
+    print(f"PWCCA between MT and LM in layer {i+1}", compute_pwcca(Matrix_MT[i].transpose(),Matrix_LM[i].transpose())[0])
+    print(f"PWCCA between LM and MLM in layer {i+1}", compute_pwcca(Matrix_LM[i].transpose(),Matrix_MLM[i].transpose())[0])
