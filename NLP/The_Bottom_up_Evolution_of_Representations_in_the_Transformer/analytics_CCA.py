@@ -128,3 +128,10 @@ for i in range(NLAYERS):
     print(f"PWCCA between MT and MLM in layer {i+1}", compute_pwcca(Matrix_MT[i].transpose(),Matrix_MLM[i].transpose())[0])
     print(f"PWCCA between MT and LM in layer {i+1}", compute_pwcca(Matrix_MT[i].transpose(),Matrix_LM[i].transpose())[0])
     print(f"PWCCA between LM and MLM in layer {i+1}", compute_pwcca(Matrix_LM[i].transpose(),Matrix_MLM[i].transpose())[0])
+    print('-'*50)
+
+for i in range(NLAYERS-1):
+    print(f"PWCCA between layer {i+1} and layer {i+2} of MT model", compute_pwcca(Matrix_MT[i].transpose(),Matrix_MT[i+1].transpose())[0])
+    print(f"PWCCA between layer {i+1} and layer {i+2} of LM model", compute_pwcca(Matrix_LM[i].transpose(),Matrix_LM[i+1].transpose())[0])
+    print(f"PWCCA between layer {i+1} and layer {i+2} of MLM model", compute_pwcca(Matrix_MLM[i].transpose(),Matrix_MLM[i+1].transpose())[0])
+    print('-'*50)
