@@ -1,6 +1,8 @@
 """
 Notes:
-Regarding CCA, the authors mention, in 5.2.1, that all tokens come from 5000
+This script generates data for the pictures in part 5.2.1 and 5.2.2.
+
+The authors mention, in 5.2.1, that all tokens come from 5000
 sentences without saying anything about the frequency of the tokens. Hence, I do
 not filter the sentences and select the first 5000 sentences in the training
 set.
