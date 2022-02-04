@@ -99,7 +99,7 @@ for this_model_name in MODELS_INP:
             this_sample_size_dict_OUT[this_token_id]=0
         sample_size_dict_INP[this_model_name.split('.')[0]]=this_sample_size_dict_INP
         sample_size_dict_OUT[this_model_name.split('.')[0]]=this_sample_size_dict_OUT
-    if this_model_name.startswith("MT"):
+    elif this_model_name.startswith("MT"):
         this_sample_size_dict_INP={}
         for this_token_id in frequent_vocab:
             this_sample_size_dict_INP[this_token_id]=0
