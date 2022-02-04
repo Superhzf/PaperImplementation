@@ -175,8 +175,8 @@ for batch in train_iter:
         elif this_model_name.startswith("LM") and len(target_sample_INP_LM)>0 and len(target_sample_OUT_LM)>0:
             src_mask = generate_square_subsequent_mask(src_seq_LM.size(0))
             _ = this_model(src_seq_LM, src_mask.to(device))
-            token_reps_list_INP=token_reps_model_INP[LM_NAME.split('.')[0]]
-            token_reps_list_OUT=token_reps_model_OUT[LM_NAME.split('.')[0]]
+            token_reps_list_INP=token_reps_model_INP[this_model_name.split('.')[0]]
+            token_reps_list_OUT=token_reps_model_OUT[this_model_name.split('.')[0]]
 
             this_sample_size_dict_INP=sample_size_dict_INP[this_model_name.split('.')[0]]
             this_sample_size_dict_OUT=sample_size_dict_OUT[this_model_name.split('.')[0]]
