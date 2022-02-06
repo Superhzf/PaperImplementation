@@ -179,7 +179,7 @@ for this_vocab_list in frequent_vocab_list:
     print("Matrix_MLM.shape",Matrix_MLM.shape)
     print("Matrix_LM.shape",Matrix_LM.shape)
     for i in range(NLAYERS-1):
-        print(f"PWCCA between layer {i+1} and layer {i+2} of MT model", compute_pwcca(Matrix_MT[i].transpose(),Matrix_MT[i+1].transpose())[0])
+        print(f"PWCCA between layer {i+1} and layer {i+2} of MT model", compute_pwcca(Matrix_MT[i].transpose(),Matrix_MT[i+1].transpose()))
         print(f"PWCCA between layer {i+1} and layer {i+2} of LM model", compute_pwcca(Matrix_LM[i].transpose(),Matrix_LM[i+1].transpose())[0])
         print(f"PWCCA between layer {i+1} and layer {i+2} of MLM model", compute_pwcca(Matrix_MLM[i].transpose(),Matrix_MLM[i+1].transpose())[0])
         print('-'*50)
