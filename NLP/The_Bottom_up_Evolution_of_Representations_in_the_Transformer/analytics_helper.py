@@ -19,7 +19,7 @@ The range of frequency of target ids should show up in the material. The ith pos
 in UPPERBOUND_LIST corresponds to the ith position in LOWERBOUND_LIST.
 """
 
-MIN_SAMPLE_SIZE_DEV=5
+MIN_SAMPLE_SIZE_DEV=10
 MIN_SAMPLE_SIZE_FULL=1000
 
 N_FREQUENT_DEV=10
@@ -206,4 +206,24 @@ def GetInterValuesCCA(this_model, NUM2WORD, matrix,layer_idx, is_LM):
         this_sen_rep=this_model.activation[f'{NUM2WORD[layer_idx+1]}_layer'][:-1].detach().numpy()
     this_sen_rep=np.squeeze(this_sen_rep,1)
     matrix.append(this_sen_rep)
+    return matrix
+
+
+def GetInterValuesCCA2(token_reps_list, nlayers, matrix):
+    """
+    Return the intermediate values from token_reps_list. The values are saved
+    in matrix. The shape of matrix is (nlayers, n_tokens, n_neurons).
+    """
+    for i in range(nlayers):
+        this_Matrix=np.array([])
+        this_token_reps=token_reps_list[i]
+        for token_id, samples in this_token_reps.items():
+            samples=np.array(samples)
+            samples=samples.squeeze(1)
+            if len(this_Matrix) <= 0:
+                this_Matrix=samples
+            else:
+                this_Matrix=np.concatenate((this_Matrix,samples),axis=0)
+        matrix.append(this_Matrix)
+    matrix=np.array(matrix)
     return matrix
