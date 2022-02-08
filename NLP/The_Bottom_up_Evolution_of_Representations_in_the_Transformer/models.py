@@ -1,3 +1,5 @@
+# Difference between attn_mask and key_padding_mask in MultiheadAttention
+# https://stackoverflow.com/questions/62629644/what-the-difference-between-att-mask-and-key-padding-mask-in-multiheadattnetion
 import torch
 from torch import nn, Tensor
 import math
