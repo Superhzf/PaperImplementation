@@ -9,7 +9,7 @@ import time
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-def train_epoch(model: nn.Module, train_iter, criterion, ntokens, optimizer,epoch, sync_every_steps):
+def train_epoch(model: nn.Module, train_iter, criterion, ntokens, optimizer,epoch, sync_every_steps,src_pad_idx):
     model.train()
     losses=0
     i=1
@@ -21,7 +21,8 @@ def train_epoch(model: nn.Module, train_iter, criterion, ntokens, optimizer,epoc
         target = src_seq[1:].view(-1).to(device)
         seq_len=input.size(0)
         src_mask=generate_square_subsequent_mask(seq_len).to(device)
-        output = model(input, src_mask)
+        src_padding_mask = (input == src_pad_idx).transpose(0, 1)
+        output = model(input, src_mask, src_padding_mask)
         loss = criterion(output.view(-1, ntokens), target)
         curr_loss=loss.item()
         loss = loss/sync_every_steps

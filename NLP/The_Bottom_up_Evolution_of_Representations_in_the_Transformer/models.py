@@ -178,10 +178,10 @@ class TransformerModel(nn.Module):
         torch.manual_seed(seed_decoder)
         self.decoder.weight.data.uniform_(-initrange, initrange)
 
-    def forward(self, src: Tensor, src_mask: Tensor)->Tensor:
+    def forward(self, src: Tensor, src_mask: Tensor, padding_mask: Tensor)->Tensor:
         self.src_emb = self.src_tok_emb(src) * math.sqrt(self.d_model)
         self.src_pe = self.pos_encoder(self.src_emb)
-        self.output_te = self.transformer_encoder(self.src_pe, src_mask)
+        self.output_te = self.transformer_encoder(self.src_pe, src_mask, padding_mask)
         output = self.decoder(self.output_te)
         return output
 

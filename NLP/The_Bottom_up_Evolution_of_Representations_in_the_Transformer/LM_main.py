@@ -1,5 +1,5 @@
 # Modified from
-# https://pytorch.org/tutorials/beginner/translation_transformer.html
+# https://pytorch.org/tutorials/beginner/transformer_tutorial.html
 # https://github.com/lyeoni/pretraining-for-language-understanding/blob/master/dataset_utils.py#L35
 from timeit import default_timer as timer
 from LM_helpers import train_epoch,evaluate
@@ -66,7 +66,7 @@ best_model =None
 round=0
 for epoch in range(1, EPOCHS+1):
     start_time = timer()
-    train_loss=train_epoch(model, train_iter, loss_fn, src_vocab_size, optimizer, epoch, SYNC_EVERY_STEPS)
+    train_loss=train_epoch(model, train_iter, loss_fn, src_vocab_size, optimizer, epoch, SYNC_EVERY_STEPS, src_pad_idx)
     end_time = timer()
     valid_loss = evaluate(model, valid_iter, src_vocab_size, loss_fn)
     valid_ppl = math.exp(val_loss)

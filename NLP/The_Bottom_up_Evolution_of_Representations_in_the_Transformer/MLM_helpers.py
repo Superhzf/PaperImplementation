@@ -31,8 +31,8 @@ def train_epoch(model, dataloader, criterion, ntokens, optimizer, epoch, src_pad
         input = input.flatten()
         input[mask_idx] = 103
         input = input.view(src_seq.size())
-
-        out = model(input.to(device), src_mask.to(device))
+        src_padding_mask = (input == src_pad_idx).transpose(0, 1)
+        out = model(input.to(device), src_mask.to(device), src_padding_mask)
         loss = criterion(out.view(-1, ntokens), src_seq.view(-1).to(device))
         curr_loss=loss.item()
         loss = loss/sync_every_steps
