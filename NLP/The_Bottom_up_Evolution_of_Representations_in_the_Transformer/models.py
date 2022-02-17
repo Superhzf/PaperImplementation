@@ -161,8 +161,7 @@ class TransformerModel(nn.Module):
         self.pos_encoder = PositionalEncoding(d_model, dropout)
         encoder_layers = TransformerEncoderLayer(d_model, nhead, dim_feedforward, dropout)
         self.num_encoder_layer=num_encoder_layer
-        self.layer_norm = nn.LayerNorm(d_model, eps=1e-6)
-        self.transformer_encoder = TransformerEncoder(encoder_layers, self.num_encoder_layer, self.layer_norm)
+        self.transformer_encoder = TransformerEncoder(encoder_layers, self.num_encoder_layer)
         self.d_model = d_model
         self.decoder = nn.Linear(d_model, src_vocab_size)
         self.activation={}
