@@ -5,6 +5,7 @@ from torch import nn, Tensor
 import math
 from torch.nn import TransformerEncoder, TransformerEncoderLayer, TransformerDecoder, TransformerDecoderLayer
 import os
+from typing import Union
 """
 Per the paper, we need to set up seeds to make sure different tasks (LM, MLM, MT)
 share the same initialization.
@@ -185,6 +186,59 @@ class TransformerModel(nn.Module):
         self.src_pe = self.pos_encoder(self.src_emb)
         self.output_te = self.transformer_encoder(self.src_pe, src_mask, padding_mask)
         output = self.decoder(self.output_te)
+        return output
+
+
+class SepTransformerModel(nn.Module):
+    """
+    This is the separated version of TransformerModel class. Specifically, instead
+    of using torch.nn.TransformerEncoder, I split it and construct the intermediate
+    torch.nn.TransformerEncoderLayer separately. That way we can alter the "mask"
+    parameter for different intermediate layers.
+    """
+    def __init__(self,
+                 src_vocab_size:int,
+                 d_model:int,
+                 nhead:int,
+                 dim_feedforward:int,
+                 num_encoder_layer:int,
+                 dropout:float=0.5,
+                 initialize_weights:bool=True):
+        super().__init__()
+        self.src_tok_emb = nn.Embedding(src_vocab_size, d_model)
+        self.pos_encoder = PositionalEncoding(d_model, dropout)
+        self.num_encoder_layer=num_encoder_layer
+        self.transformer_encoder=nn.ModuleList([TransformerEncoderLayer(d_model, nhead, dim_feedforward, dropout)
+                                                for _ in range(self.num_encoder_layer)])
+        self.d_model = d_model
+        self.decoder = nn.Linear(d_model, src_vocab_size)
+        self.activation={}
+        for i in range(self.num_encoder_layer):
+            name="{}_layer".format(NUM2WORD[i+1])
+            self.transformer_encoder[i].register_forward_hook(GetActivation(name, self.activation))
+        if initialize_weights:
+            self.init_weights()
+
+    def init_weights(self) -> None:
+        initrange = 0.1
+        torch.manual_seed(seed_src_tok_emb)
+        self.src_tok_emb.weight.data.uniform_(-initrange, initrange)
+        self.decoder.bias.data.zero_()
+        torch.manual_seed(seed_decoder)
+        self.decoder.weight.data.uniform_(-initrange, initrange)
+
+    def forward(self, src: Tensor, src_mask: Union[list, Tensor], padding_mask: Tensor)->Tensor:
+        self.src_emb = self.src_tok_emb(src) * math.sqrt(self.d_model)
+        self.src_pe = self.pos_encoder(self.src_emb)
+        if isinstance(src_mask, list):
+            assert len(src_mask) == self.num_encoder_layer
+            for enc_layer, this_src_mask in zip(self.transformer_encoder,src_mask):
+                self.src_pe = enc_layer(self.src_pe, this_src_mask, padding_mask)
+        else:
+            for enc_layer in self.transformer_encoder:
+                self.src_pe = enc_layer(self.src_pe, src_mask, padding_mask)
+
+        output = self.decoder(self.src_pe)
         return output
 
 
