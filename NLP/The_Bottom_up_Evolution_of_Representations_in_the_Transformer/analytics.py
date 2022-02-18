@@ -205,14 +205,26 @@ for batch in train_iter:
     is_enough=True
     if this_min_sample_size_inp>=min_sample_size and this_min_sample_size_out>=min_sample_size:
         for model_name, reps_dict in token_reps_model_INP.items():
-            if len(reps_dict)<N_frequent:
-                is_enough=False
+            if is_enough is False:
                 break
-                
+            for this_layer in reps_dict:
+                if is_enough is False:
+                    break
+                for token_id, rep_list in this_layer.items():
+                    if len(rep_list)<min_sample_size:
+                        is_enough=False
+                        break
+
         for model_name, reps_list in token_reps_model_OUT.items():
-            if len(reps_dict)<N_frequent:
-                is_enough=False
+            if is_enough is False:
                 break
+            for this_layer in reps_dict:
+                if is_enough is False:
+                    break
+                for token_id, rep_list in this_layer.items():
+                    if len(rep_list)<min_sample_size:
+                        is_enough=False
+                        break
     else:
         is_enough=False
     if is_enough:
