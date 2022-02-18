@@ -12,7 +12,7 @@ from data_preprocessing import DATA_DIR_DEV, DATA_DIR_FULL, PAD_WORD
 from data_preprocessing import SAVE_MODEL_PATH, NO_BETTER_THAN_ROUND
 from models import D_MODEL, FFN_HID_DIM, NLAYERS, NHEAD, BATCH_SIZE, DROPOUT
 from models import EPOCHS_DEV, EPOCHS_FULL, SYNC_EVERY_BATCH_DEV, SYNC_EVERY_BATCH_FULL
-from models import TransformerModel, LOSS_FN, ScheduledOptim
+from models import SepTransformerModel, LOSS_FN, ScheduledOptim
 from models import LM_NAME
 import os
 import math
@@ -48,12 +48,12 @@ train = Dataset(examples=train_examples, fields=fields)
 valid = Dataset(examples=valid_examples, fields=fields)
 train_iter = BucketIterator(train, batch_size=BATCH_SIZE, device=device, train=True, shuffle=False)
 valid_iter = BucketIterator(valid, batch_size=BATCH_SIZE, device=device, shuffle=False)
-model=TransformerModel(src_vocab_size=src_vocab_size,
-                       d_model=D_MODEL,
-                       nhead=NHEAD,
-                       dim_feedforward=FFN_HID_DIM,
-                       num_encoder_layer=NLAYERS,
-                       dropout=DROPOUT)
+model=SepTransformerModel(src_vocab_size=src_vocab_size,
+                          d_model=D_MODEL,
+                          nhead=NHEAD,
+                          dim_feedforward=FFN_HID_DIM,
+                          num_encoder_layer=NLAYERS,
+                          dropout=DROPOUT)
 
 model=model.to(device)
 loss_fn=LOSS_FN(ignore_index=src_pad_idx)

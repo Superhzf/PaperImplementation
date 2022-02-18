@@ -31,7 +31,6 @@ def train_epoch(model: nn.Module, train_iter, criterion, ntokens, optimizer,epoc
         if i%sync_every_steps == 0:
             optimizer.step_and_update_lr()
             optimizer.zero_grad()
-            print("Great, parameters have been updated")
 
         losses += curr_loss
         # print the information at each batch
