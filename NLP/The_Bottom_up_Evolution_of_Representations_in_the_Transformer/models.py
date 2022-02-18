@@ -257,8 +257,6 @@ class Seq2SeqTransformer(TransformerModel):
     into two parts.
 
     ref:https://pytorch.org/docs/stable/_modules/torch/nn/modules/transformer.html
-
-    TODO: Find out what *_padding_mask for from the MultiheadAttention class.
     """
     def __init__(self,
                  src_vocab_size:int,
