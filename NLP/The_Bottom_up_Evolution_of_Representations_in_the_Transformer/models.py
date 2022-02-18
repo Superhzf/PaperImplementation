@@ -321,6 +321,76 @@ class Seq2SeqTransformer(TransformerModel):
         return self.decoder(output)
 
 
+class SepSeq2SeqTransformer(SepTransformerModel):
+    """
+    This is the separated version of Seq2SeqTransformer class. Specifically, instead
+    of using torch.nn.TransformerEncoder, I split it and construct the intermediate
+    torch.nn.TransformerEncoderLayer separately. That way we can alter the "mask"
+    parameter for different intermediate layers.
+    """
+    def __init__(self,
+                 src_vocab_size:int,
+                 d_model:int,
+                 nhead:int,
+                 dim_feedforward:int,
+                 num_encoder_layer:int,
+                 dropout:float,
+                 num_decoder_layer:int,
+                 tgt_vocab_size:int):
+        super().__init__(src_vocab_size,
+                         d_model,nhead,
+                         dim_feedforward,
+                         num_encoder_layer,
+                         dropout,
+                         False)
+        self.decoder=nn.Linear(d_model, tgt_vocab_size)
+        self.tgt_tok_emb = nn.Embedding(tgt_vocab_size, d_model)
+        decoder_layers = TransformerDecoderLayer(d_model=d_model,
+                                                 nhead=nhead,
+                                                 dim_feedforward=dim_feedforward,
+                                                 dropout=dropout)
+        self.transformer_decoder = TransformerDecoder(decoder_layers, num_decoder_layer)
+        self.init_weights()
+
+    def init_weights(self):
+        initrange = 0.1
+        torch.manual_seed(seed_src_tok_emb)
+        self.src_tok_emb.weight.data.uniform_(-initrange, initrange)
+        torch.manual_seed(seed_tgt_tok_emb)
+        self.tgt_tok_emb.weight.data.uniform_(-initrange, initrange)
+        self.decoder.bias.data.zero_()
+        torch.manual_seed(seed_decoder)
+        self.decoder.weight.data.uniform_(-initrange, initrange)
+
+    def forward(self,
+                src: Tensor,
+                src_mask: Union[list, Tensor],
+                trg: Tensor,
+                tgt_mask:Tensor,
+                src_padding_mask:Tensor,
+                tgt_padding_mask:Tensor,
+                memory_key_padding_mask: Tensor):
+        src = self.src_tok_emb(src)*math.sqrt(self.d_model)
+        trg = self.tgt_tok_emb(trg)*math.sqrt(self.d_model)
+        src_emb = self.pos_encoder(src)
+        tgt_emb = self.pos_encoder(trg)
+
+        if isinstance(src_mask, list):
+            assert len(src_mask) == self.num_encoder_layer
+            for enc_layer, this_src_mask in zip(self.transformer_encoder,src_mask):
+                src_emb = enc_layer(src_emb, this_src_mask, src_padding_mask)
+        else:
+            for enc_layer in self.transformer_encoder:
+                src_emb = enc_layer(src_emb, src_mask, src_padding_mask)
+
+        output = self.transformer_decoder(tgt_emb,
+                                          src_emb,
+                                          tgt_mask=tgt_mask,
+                                          memory_mask=None,
+                                          tgt_key_padding_mask=tgt_padding_mask,
+                                          memory_key_padding_mask=memory_key_padding_mask)
+        return self.decoder(output)
+
 
 class ScheduledOptim():
     '''

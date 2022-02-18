@@ -12,7 +12,7 @@ from data_preprocessing import DATA_DIR_DEV, DATA_DIR_FULL, PAD_WORD
 from data_preprocessing import SAVE_MODEL_PATH, NO_BETTER_THAN_ROUND
 from models import D_MODEL, FFN_HID_DIM, NLAYERS, NHEAD, BATCH_SIZE, DROPOUT
 from models import EPOCHS_DEV, EPOCHS_FULL, SYNC_EVERY_BATCH_DEV, SYNC_EVERY_BATCH_FULL
-from models import Seq2SeqTransformer, LOSS_FN, ScheduledOptim
+from models import SepSeq2SeqTransformer, LOSS_FN, ScheduledOptim
 from models import MT_NAME
 import os
 import math
@@ -51,7 +51,7 @@ valid = Dataset(examples=valid_examples, fields=fields)
 train_iter = BucketIterator(train, batch_size=BATCH_SIZE, device=device, train=True, shuffle=False)
 valid_iter = BucketIterator(valid, batch_size=BATCH_SIZE, device=device, shuffle=False)
 
-model=Seq2SeqTransformer(src_vocab_size=src_vocab_size,
+model=SepSeq2SeqTransformer(src_vocab_size=src_vocab_size,
                          d_model=D_MODEL,
                          nhead=NHEAD,
                          dim_feedforward=FFN_HID_DIM,
