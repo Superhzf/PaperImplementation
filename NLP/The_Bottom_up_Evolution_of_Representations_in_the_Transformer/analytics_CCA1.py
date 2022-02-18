@@ -88,7 +88,8 @@ for batch in train_iter:
                 Matrix_MT=np.concatenate((Matrix_MT,this_Matrix_MT),axis=1)
         elif this_model_name.startswith("MLM"):
             src_mask = generate_square_subsequent_mask(src_seq_MLM_SAME.size(0))
-            _ = this_model(src_seq_MLM_SAME, src_mask.to(device))
+            src_padding_mask = (src_seq_MLM_SAME == src_pad_idx).transpose(0, 1)
+            _ = this_model(src_seq_MLM_SAME, src_mask.to(device),src_padding_mask.to(device))
             if count_sentence>=1:
                 this_Matrix_MLM=[]
             for i in range(NLAYERS):
@@ -104,7 +105,8 @@ for batch in train_iter:
                 Matrix_MLM=np.concatenate((Matrix_MLM,this_Matrix_MLM),axis=1)
         elif this_model_name.startswith("LM"):
             src_mask = generate_square_subsequent_mask(src_seq_LM.size(0))
-            _ = this_model(src_seq_LM, src_mask.to(device))
+            src_padding_mask = (src_seq_LM == src_pad_idx).transpose(0, 1)
+            _ = this_model(src_seq_LM, src_mask.to(device),src_padding_mask.to(device))
             if count_sentence>=1:
                 this_Matrix_LM=[]
             for i in range(NLAYERS):

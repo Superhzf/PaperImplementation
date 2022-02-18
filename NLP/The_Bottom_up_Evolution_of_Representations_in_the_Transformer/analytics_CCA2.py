@@ -123,7 +123,8 @@ for this_vocab_list in frequent_vocab_list:
 
             elif this_model_name.startswith("MLM") and len(target_sample_MLM_SAME)>0:
                 src_mask = generate_square_subsequent_mask(src_seq_MLM_SAME.size(0))
-                _ = this_model(src_seq_MLM_SAME, src_mask.to(device))
+                src_padding_mask = (src_seq_MLM_SAME == src_pad_idx).transpose(0, 1)
+                _ = this_model(src_seq_MLM_SAME, src_mask.to(device),src_padding_mask.to(device))
                 token_reps_list=token_reps_model[f"{MLM_NAME.split('.')[0]}_SAME"]
                 this_sample_size_dict=sample_size_dict[f"{this_model_name.split('.')[0]}_SAME"]
                 GetInterValues(this_model, target_sample_MLM_SAME, NUM2WORD, token_reps_list, this_sample_size_dict, min_sample_size, NLAYERS)
@@ -131,7 +132,8 @@ for this_vocab_list in frequent_vocab_list:
 
             elif this_model_name.startswith("LM") and len(target_sample_LM)>0:
                 src_mask = generate_square_subsequent_mask(src_seq_LM.size(0))
-                _ = this_model(src_seq_LM, src_mask.to(device))
+                src_padding_mask = (src_seq_LM == src_pad_idx).transpose(0, 1)
+                _ = this_model(src_seq_LM, src_mask.to(device),src_padding_mask.to(device))
                 token_reps_list=token_reps_model[this_model_name.split('.')[0]]
                 this_sample_size_dict=sample_size_dict[this_model_name.split('.')[0]]
                 GetInterValues(this_model, target_sample_LM, NUM2WORD, token_reps_list, this_sample_size_dict, min_sample_size, NLAYERS)
@@ -161,6 +163,7 @@ for this_vocab_list in frequent_vocab_list:
         if is_enough:
             break
 
+
     # calculate CCA
     Matrix_MT=[]
     Matrix_LM=[]
@@ -179,7 +182,7 @@ for this_vocab_list in frequent_vocab_list:
     print("Matrix_MLM.shape",Matrix_MLM.shape)
     print("Matrix_LM.shape",Matrix_LM.shape)
     for i in range(NLAYERS-1):
-        print(f"PWCCA between layer {i+1} and layer {i+2} of MT model", compute_pwcca(Matrix_MT[i].transpose(),Matrix_MT[i+1].transpose()))
+        print(f"PWCCA between layer {i+1} and layer {i+2} of MT model", compute_pwcca(Matrix_MT[i].transpose(),Matrix_MT[i+1].transpose())[0])
         print(f"PWCCA between layer {i+1} and layer {i+2} of LM model", compute_pwcca(Matrix_LM[i].transpose(),Matrix_LM[i+1].transpose())[0])
         print(f"PWCCA between layer {i+1} and layer {i+2} of MLM model", compute_pwcca(Matrix_MLM[i].transpose(),Matrix_MLM[i+1].transpose())[0])
         print('-'*50)
