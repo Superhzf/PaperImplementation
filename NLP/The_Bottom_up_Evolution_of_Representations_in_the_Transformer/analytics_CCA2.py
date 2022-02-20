@@ -1,6 +1,6 @@
 """
 Notes:
-This script generates data for the pictures in part 5.3.1
+This script generates data for the pictures in part 5.3.1 figure 4
 """
 
 import os
