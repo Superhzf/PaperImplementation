@@ -227,13 +227,16 @@ class SepTransformerModel(nn.Module):
         torch.manual_seed(seed_decoder)
         self.decoder.weight.data.uniform_(-initrange, initrange)
 
-    def forward(self, src: Tensor, src_mask: Union[list, Tensor], padding_mask: Tensor)->Tensor:
+    def forward(self, src: Tensor, src_mask: Tensor, padding_mask: Union[list, Tensor])->Tensor:
         self.src_emb = self.src_tok_emb(src) * math.sqrt(self.d_model)
         self.src_pe = self.pos_encoder(self.src_emb)
-        if isinstance(src_mask, list):
-            assert len(src_mask) == self.num_encoder_layer
-            for enc_layer, this_src_mask in zip(self.transformer_encoder,src_mask):
-                self.src_pe = enc_layer(self.src_pe, this_src_mask, padding_mask)
+        if isinstance(padding_mask, list):
+            # assert len(padding_mask) == self.num_encoder_layer
+            # we don't need any assertion here because len(padding_mask) could be
+            # smaller than self.num_encoder_layer because we don't need reps in
+            # layers after tokens are masked out.
+            for enc_layer, this_padding_mask in zip(self.transformer_encoder,padding_mask):
+                self.src_pe = enc_layer(self.src_pe, src_mask, this_padding_mask.to(device))
         else:
             for enc_layer in self.transformer_encoder:
                 self.src_pe = enc_layer(self.src_pe, src_mask, padding_mask)
@@ -375,10 +378,12 @@ class SepSeq2SeqTransformer(SepTransformerModel):
         src_emb = self.pos_encoder(src)
         tgt_emb = self.pos_encoder(trg)
 
-        if isinstance(src_mask, list):
-            assert len(src_mask) == self.num_encoder_layer
-            for enc_layer, this_src_mask in zip(self.transformer_encoder,src_mask):
-                src_emb = enc_layer(src_emb, this_src_mask, src_padding_mask)
+        if isinstance(src_padding_mask, list):
+            # assert len(src_mask) == self.num_encoder_layer
+            # the length of those two does not need to be the same as I mentioned
+            # in SepTransformerModel class.
+            for enc_layer, this_src_padding_mask in zip(self.transformer_encoder,src_padding_mask):
+                src_emb = enc_layer(src_emb, src_mask, this_src_padding_mask)
         else:
             for enc_layer in self.transformer_encoder:
                 src_emb = enc_layer(src_emb, src_mask, src_padding_mask)
