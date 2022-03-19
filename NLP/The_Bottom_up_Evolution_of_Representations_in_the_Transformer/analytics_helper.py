@@ -119,6 +119,34 @@ def GetInter(lst1, lst2):
     return result_dict
 
 
+def GetInterExcept(lst1, lst2):
+    """
+    Return the index of the tokens that are in lst1 but not in lst2 under the
+    condition that lst1 and lst2 have commen tokens.
+    ----------------
+    Parameters:
+
+    lst1: a list of list that includes IDs in a sentence.
+    lst2: The vocabulary list
+    -----------------
+    Returns:
+    result_dict: dict
+        lst3[pos]=token_id. Pos is the position of the shared token_id in lst1.
+    """
+    flat_list = [item for sublist in lst1 for item in sublist]
+    result_dict={}
+    have_common=False
+    for idx, token_id in enumerate(flat_list):
+        if token_id in lst2:
+            have_common=True
+            result_dict[idx]=token_id
+
+    if have_common:
+        return result_dict
+    else:
+        return {}
+
+
 def GetMI(token_reps_list, N_frequent, N_cluster, num_layers, result_list):
     """
     Return the mutual information between input/output tokens and the intermediate
@@ -193,6 +221,42 @@ def GetInterValues(this_model, target_sample, NUM2WORD, token_reps_list, sample_
                 this_token_resp=token_reps_list[i]
                 this_token_resp[token_id].append(this_model.activation[f'{NUM2WORD[i+1]}_layer'][pos].detach().numpy())
                 sample_size_dict[token_id]+=1
+
+
+def GetInterValuesCCA3(this_model, target_sample, NUM2WORD, token_reps_list, num_layers,target_layer=None):
+    """
+    The function extracts the all intermediate layer values of this_model except
+    those token ids in target_sample. Besides, it will also return
+    -------------------------------------
+    Parameters:
+    this_model: Pytorch model
+        This is the model from which we would extract intermediate values
+    target_sample: list
+        This includes the token ids that interest us
+    NUM2WORD: dict
+        NUM2WORD translates from layer number to layer name
+    this_token_resp: dict
+        It saves the reps of tokens for one of the models (ML, MLM, MT). The format
+        is this_token_resp[id]=reps.
+    num_layers: int
+        The number of intermediate layers
+    target_layer: int
+        This parameter is used specifically for calculating the influence
+        of tokens on other tokens
+    """
+    if target_layer is None:
+        for i in range(num_layers):
+            reps=this_model.activation[f'{NUM2WORD[i+1]}_layer'].detach().numpy()
+            reps=np.squeeze(reps,1)
+            reps=np.delete(reps,obj=list(target_sample.keys()),axis=0)
+            token_reps_list[i].append(reps)
+    else:
+        reps=this_model.activation[f'{NUM2WORD[target_layer+1]}_layer'].detach().numpy()
+        reps=np.squeeze(reps,1)
+        reps=np.delete(reps,obj=list(target_sample.keys()),axis=0)
+        token_reps_list[target_layer].append(reps)
+
+    return token_reps_list, len(reps)
 
 
 def GetInterValuesCCA(this_model, NUM2WORD, matrix,layer_idx, is_LM):
