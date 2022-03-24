@@ -264,14 +264,8 @@ for this_vocab_list in frequent_vocab_list:
             break
 
     # calculate CCA
-    print("MT_matrix_mask_in.shape",MT_matrix_mask_in.shape)
-    print("MT_matrix_mask_out.shaoe",MT_matrix_mask_out.shape)
-
-    print("MLM_matrix_mask_in.shape",MLM_matrix_mask_in.shape)
-    print("MLM_matrix_mask_out.shaoe",MLM_matrix_mask_out.shape)
-
-    print("LM_matrix_mask_in.shape",LM_matrix_mask_in.shape)
-    print("LM_matrix_mask_out.shaoe",LM_matrix_mask_out.shape)
+    # TOOD: increase the min_sample_size so that Python won't complain about
+    # the shape of x_matrix_mask_in/out
     for this_model_name in MODELS:
         for this_layer in range(NLAYERS):
             if this_model_name.startswith("MLM"):
