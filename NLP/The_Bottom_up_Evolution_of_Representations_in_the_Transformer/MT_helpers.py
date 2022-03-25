@@ -10,7 +10,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def patch_trg(trg, pad_idx):
-    trg, gold = trg[:-1, :], trg[1:, :].contiguous().view(-1)
+    trg, gold = trg[1:, :], trg[1:, :].contiguous().view(-1)
     return trg, gold
 
 
@@ -42,7 +42,7 @@ def train_epoch(model, optimizer, loss_fn, train_iter, src_pad_idx, trg_pad_idx,
         start_time = time.time()
         src = batch.src
         trg = batch.trg
-        src_seq = src.to(device)
+        src_seq = src[1:].to(device)
         trg_seq, gold = map(lambda x: x.to(device), patch_trg(trg, trg_pad_idx))
         trg_seq = trg_seq.to(device)
         src_mask, trg_mask, src_padding_mask, trg_padding_mask = create_mask(src_seq, trg_seq, src_pad_idx, trg_pad_idx)

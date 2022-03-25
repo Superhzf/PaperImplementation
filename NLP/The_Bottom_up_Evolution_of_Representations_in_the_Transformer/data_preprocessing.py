@@ -3,6 +3,12 @@ Modified from
 https://github.com/jadore801120/attention-is-all-you-need-pytorch/blob/master/preprocess.py
 
 Please be aware that the original file some bugs and it cannot run.
+
+BOS/SOS:
+https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
+https://github.com/nicolas-ivanov/tf_seq2seq_chatbot/issues/15
+https://datascience.stackexchange.com/questions/26947/why-do-we-need-to-add-start-s-end-s-symbols-when-using-recurrent-neural-n
+https://discuss.pytorch.org/t/why-eos-token-in-encoder-input/64926
 """
 import sys
 import os
