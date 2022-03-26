@@ -42,6 +42,27 @@ def train_epoch(model, optimizer, loss_fn, train_iter, src_pad_idx, trg_pad_idx,
         start_time = time.time()
         src = batch.src
         trg = batch.trg
+        """
+        If tokens are "<BOS> it is nice to meet you <EOS>"
+        Per the paper author:
+        Input:  "it is nice to meet you <EOS>" from the source side
+        Target: "it is nice to meet you <EOS>" from the target side
+        Output: "it is nice to meet you <EOS>" from the target side
+
+        It confuses me about <BOS> or <SOS>, per the paper author, "You can add <bos> if you
+        like (although, I don't think this is standard),". So, I remove <BOS> in
+        the input. However, per the examples by PyTorch tutorials this
+        https://pytorch.org/tutorials/beginner/translation_transformer.html
+        and this
+        https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
+        <BOS> or <SOS> are required.
+
+        Due to the discrepancy in <BOS>, the inputs per the paper author and per
+        PyTorch tutorials are different. Per PyTorch:
+        Input:  "<BOS> it is nice to meet you <EOS>" from the source side
+        Target: "<BOS> it is nice to meet you" from the target side
+        Output: "it is nice to meet you <EOS>" from the target side
+        """
         src_seq = src[1:].to(device)
         trg_seq, gold = map(lambda x: x.to(device), patch_trg(trg, trg_pad_idx))
         trg_seq = trg_seq.to(device)
