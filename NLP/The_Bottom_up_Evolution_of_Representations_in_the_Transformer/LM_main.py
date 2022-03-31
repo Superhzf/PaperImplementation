@@ -8,7 +8,7 @@ from torchtext.legacy.data import Dataset,BucketIterator
 import torch
 from data_preprocessing import DEVELOPMENT_MODE
 from data_preprocessing import SAVE_VOCAB_SRC, SAVE_VOCAB_TRG, SAVE_DATA_MT_TRAIN, SAVE_DATA_MT_VAL
-from data_preprocessing import DATA_DIR_DEV, DATA_DIR_FULL, PAD_WORD
+from data_preprocessing import DATA_DIR_DEV, DATA_DIR_FULL, PAD_WORD, EOS_WORD, BOS_WORD
 from data_preprocessing import SAVE_MODEL_PATH, NO_BETTER_THAN_ROUND
 from models import D_MODEL, FFN_HID_DIM, NLAYERS, NHEAD, BATCH_SIZE, DROPOUT
 from models import EPOCHS_DEV, EPOCHS_FULL, SYNC_EVERY_BATCH_DEV, SYNC_EVERY_BATCH_FULL
@@ -40,7 +40,10 @@ train_examples = pickle.load(open(train_pkl, 'rb'))
 valid_examples = pickle.load(open(valid_pkl, 'rb'))
 
 src_pad_idx = field_src.vocab.stoi[PAD_WORD]
-
+eos_idx = field_src.vocab.stoi[EOS_WORD]
+bos_ids = field_src.vocab.stoi[BOS_WORD]
+# print("eos_idx",eos_idx)
+# print("bos_ids",bos_ids)
 src_vocab_size = len(field_src.vocab)
 
 fields = {'src':field_src , 'trg':field_trg}
@@ -66,7 +69,8 @@ best_model =None
 round=0
 for epoch in range(1, EPOCHS+1):
     start_time = timer()
-    train_loss=train_epoch(model, train_iter, loss_fn, src_vocab_size, optimizer, epoch, SYNC_EVERY_STEPS, src_pad_idx)
+    train_loss=train_epoch(model, train_iter, loss_fn, src_vocab_size,
+                        optimizer, epoch, SYNC_EVERY_STEPS, src_pad_idx,eos_idx)
     end_time = timer()
     valid_loss = evaluate(model, valid_iter, src_vocab_size, loss_fn)
     valid_ppl = math.exp(val_loss)
