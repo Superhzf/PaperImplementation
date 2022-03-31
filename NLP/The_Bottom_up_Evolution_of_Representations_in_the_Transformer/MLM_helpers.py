@@ -21,7 +21,8 @@ def train_epoch(model, dataloader, criterion, ntokens, optimizer, epoch, src_pad
     optimizer.zero_grad()
     for batch in dataloader:
         src = batch.src
-        src_seq = src.to(device)
+        # we don't need the <BOS> token per the paper author
+        src_seq = src[1:].to(device)
 
         input = src_seq.clone()
         src_mask = generate_square_subsequent_mask(src_seq.size(0))
