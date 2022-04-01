@@ -61,7 +61,7 @@ def evaluate(model: nn.Module, dataloader, ntokens: int, criterion, src_pad_idx)
     with torch.no_grad():
         for batch in dataloader:
             src = batch.src
-            src_seq = src.to(device)
+            src_seq = src[1:].to(device)
 
             input = src_seq.clone()
             src_mask = generate_square_subsequent_mask(src_seq.size(0))

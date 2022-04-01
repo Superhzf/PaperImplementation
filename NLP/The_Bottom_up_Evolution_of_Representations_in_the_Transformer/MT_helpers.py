@@ -103,7 +103,7 @@ def evaluate(model, loss_fn, val_iter):
     for batch in val_iter:
         src = batch.src
         trg = batch.trg
-        src_seq = src.to(device)
+        src_seq = src[1:].to(device)
         trg_seq, gold = map(lambda x: x.to(device), patch_trg(trg, trg_pad_idx))
         trg_seq = trg_seq.to(device)
         src_mask, trg_mask, src_padding_mask, trg_padding_mask = create_mask(src_seq, trg_seq, src_pad_idx, trg_pad_idx)
