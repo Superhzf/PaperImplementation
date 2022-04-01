@@ -34,8 +34,8 @@ MAXIMUM_SENTENCE_COUNT_FULL=5000
 UPPERBOUND_LIST_FULL=[10,25,50,100,250,500,1000,2500,5000,10000,30000]
 LOWERBOUND_LIST_FULL=[1,10,25,50,100,250,500,1000,2500,5000,10000]
 
-UPPERBOUND_LIST_DEV=[10]
-LOWERBOUND_LIST_DEV=[10]
+UPPERBOUND_LIST_DEV=[9]
+LOWERBOUND_LIST_DEV=[9]
 
 def MostFreqToken(field_src, N, min_sample_size):
     """
@@ -97,10 +97,10 @@ def NFreqToken(field_src, lower_bound, upper_bound):
     return frequent_ids
 
 
-def GetInter(lst1, lst2):
+def GetIntersect(lst1, lst2):
     """
-    Return the index of the intersected tokens between lst1 and lst2. Please be aware that the same token_id may
-    show up more than once in a sentence.
+    Return the index of the intersected tokens between lst1 and lst2.
+    Please be aware that the same token_id may show up more than once in a sentence.
     ----------------
     Parameters:
 
@@ -111,9 +111,9 @@ def GetInter(lst1, lst2):
     result_dict: dict
         lst3[pos]=token_id. Pos is the position of the shared token_id in lst1.
     """
-    flat_list = [item for sublist in lst1 for item in sublist]
+    flat_list1 = [item for sublist in lst1 for item in sublist]
     result_dict = {}
-    for idx, token_id in enumerate(flat_list):
+    for idx, token_id in enumerate(flat_list1):
         if token_id in lst2:
             result_dict[idx]=token_id
     return result_dict
@@ -190,7 +190,7 @@ def GetMI(token_reps_list, N_frequent, N_cluster, num_layers, result_list):
         result_list.append(this_MI)
 
 
-def GetInterValues(this_model, target_sample, NUM2WORD, token_reps_list, sample_size_dict, min_sample_size, num_layers):
+def GetIntermediateValues(this_model, target_sample, NUM2WORD, token_reps_list, sample_size_dict, min_sample_size, num_layers,updated_sample):
     """
     The function extracts the intermediate layer values of this_model of some
     token ids. Then update this_token_resp in place and return sample_size_dict.
@@ -215,12 +215,15 @@ def GetInterValues(this_model, target_sample, NUM2WORD, token_reps_list, sample_
     """
     for pos, token_id in target_sample.items():
         # For a token ID, we only collect min_sample_size reps.
-        # the length of all dicts in token_reps_list is the same, we can use the first one
-        if len(token_reps_list[0][token_id])<min_sample_size:
+        # the length of all dicts in token_reps_list is the same, the difference
+        # is the layer. So, we can use the first layer.
+        if sample_size_dict[token_id]<min_sample_size:
             for i in range(num_layers):
                 this_token_resp=token_reps_list[i]
                 this_token_resp[token_id].append(this_model.activation[f'{NUM2WORD[i+1]}_layer'][pos].detach().numpy())
+            if not updated_sample:
                 sample_size_dict[token_id]+=1
+    return True
 
 
 def GetInterValuesCCA3(this_model, target_sample, NUM2WORD, token_reps_list, num_layers,target_layer=None):
