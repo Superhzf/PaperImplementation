@@ -3,9 +3,10 @@ Notes:
 This script generates data for the pictures in part 5.2.1 and 5.2.2.
 
 The authors mention, in 5.2.1, that all tokens come from 5000
-sentences without saying anything about the frequency of the tokens. Hence, I do
-not filter the sentences and select the first 5000 sentences in the training
-set.
+sentences which equal the number of sentences in train_iter. Hence, we don't
+have to check how many sentences have been iterated. In other words,
+maximum_sentence_count is not necessary, but I keep it for the DEVELOPMENT
+prupose.
 """
 
 import os
@@ -52,14 +53,15 @@ MODELS=[LM_NAME, MLM_NAME, MT_NAME]
 
 count_sentence=0
 for batch in train_iter:
-    src_seq_MT = batch.src.to(device)
+    this_src = batch.src[1:]
+    src_seq_MT = this_src.to(device)
     trg = batch.trg
     trg_seq_MT, gold = map(lambda x: x.to(device), patch_trg(trg, trg_pad_idx))
     trg_seq_MT = trg_seq_MT.to(device)
 
-    src_seq_MLM_SAME = batch.src.to(device)
+    src_seq_MLM_SAME = this_src.to(device)
 
-    src_seq_LM = batch.src[:-1]
+    src_seq_LM = this_src
 
     for this_model_name in MODELS:
         this_model = torch.load(os.path.join(SAVE_MODEL_PATH,this_model_name))
@@ -77,9 +79,9 @@ for batch in train_iter:
                 this_Matrix_MT=[]
             for i in range(NLAYERS):
                 if count_sentence>=1:
-                    this_Matrix_MT=GetInterValuesCCA(this_model, NUM2WORD, this_Matrix_MT, i, False)
+                    this_Matrix_MT=GetInterValuesCCA(this_model, NUM2WORD, this_Matrix_MT, i)
                 else:
-                    Matrix_MT=GetInterValuesCCA(this_model, NUM2WORD, Matrix_MT, i, False)
+                    Matrix_MT=GetInterValuesCCA(this_model, NUM2WORD, Matrix_MT, i)
                     if len(Matrix_MT)>=NLAYERS:
                         Matrix_MT=np.array(Matrix_MT)
 
@@ -94,9 +96,9 @@ for batch in train_iter:
                 this_Matrix_MLM=[]
             for i in range(NLAYERS):
                 if count_sentence>=1:
-                    this_Matrix_MLM=GetInterValuesCCA(this_model, NUM2WORD, this_Matrix_MLM, i, False)
+                    this_Matrix_MLM=GetInterValuesCCA(this_model, NUM2WORD, this_Matrix_MLM, i)
                 else:
-                    Matrix_MLM=GetInterValuesCCA(this_model, NUM2WORD, Matrix_MLM, i, False)
+                    Matrix_MLM=GetInterValuesCCA(this_model, NUM2WORD, Matrix_MLM, i)
                     if len(Matrix_MLM)>=NLAYERS:
                         Matrix_MLM=np.array(Matrix_MLM)
 
@@ -111,9 +113,9 @@ for batch in train_iter:
                 this_Matrix_LM=[]
             for i in range(NLAYERS):
                 if count_sentence>=1:
-                    this_Matrix_LM=GetInterValuesCCA(this_model, NUM2WORD, this_Matrix_LM, i, True)
+                    this_Matrix_LM=GetInterValuesCCA(this_model, NUM2WORD, this_Matrix_LM, i)
                 else:
-                    Matrix_LM=GetInterValuesCCA(this_model, NUM2WORD, Matrix_LM, i, True)
+                    Matrix_LM=GetInterValuesCCA(this_model, NUM2WORD, Matrix_LM, i)
                     if len(Matrix_LM)>=NLAYERS:
                         Matrix_LM=np.array(Matrix_LM)
 

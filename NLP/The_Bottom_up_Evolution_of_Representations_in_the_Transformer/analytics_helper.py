@@ -259,15 +259,12 @@ def GetInterValuesCCA3(this_model, target_sample, NUM2WORD, token_reps_list, num
     return token_reps_list, len(reps)
 
 
-def GetInterValuesCCA(this_model, NUM2WORD, matrix,layer_idx, is_LM):
+def GetInterValuesCCA(this_model, NUM2WORD, matrix,layer_idx):
     """
     The function extracts the intermediate layer values of this_model of all
-    tokens.
+    tokens. Be aware that we don't analyze the reps for the <EOS> token.
     """
-    if is_LM:
-        this_sen_rep=this_model.activation[f'{NUM2WORD[layer_idx+1]}_layer'].detach().numpy()
-    else:
-        this_sen_rep=this_model.activation[f'{NUM2WORD[layer_idx+1]}_layer'][:-1].detach().numpy()
+    this_sen_rep=this_model.activation[f'{NUM2WORD[layer_idx+1]}_layer'][:-1].detach().numpy()
     this_sen_rep=np.squeeze(this_sen_rep,1)
     matrix.append(this_sen_rep)
     return matrix
