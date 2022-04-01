@@ -59,9 +59,8 @@ MODELS=[MT_NAME,LM_NAME,MLM_NAME]
 
 for this_vocab_list in frequent_vocab_list:
 
-    sample_size_count_MT=0
-    sample_size_count_MLM=0
-    sample_size_count_LM=0
+    sample_size_count=0
+    updated_sample = False
 
     MT_matrix_mask_in=np.array([])
     MT_matrix_mask_out=np.array([])
@@ -71,28 +70,26 @@ for this_vocab_list in frequent_vocab_list:
     MLM_matrix_mask_out=np.array([])
 
     for batch in train_iter:
-        src_seq_MT = batch.src.to(device)
-        target_sample_MT=GetInterExcept(src_seq_MT.detach().numpy(), this_vocab_list)
+        this_src = batch.src[1:]
+        target_sample=GetInterExcept(this_src.detach().numpy(), this_vocab_list)
+        if len(target_sample)<=0:
+            continue
+        src_seq_MT = this_src.to(device)
 
         trg = batch.trg
         trg_seq_MT, gold = map(lambda x: x.to(device), patch_trg(trg, trg_pad_idx))
         trg_seq_MT = trg_seq_MT.to(device)
 
-        src_seq_MLM_SAME = batch.src.to(device)
-        target_sample_MLM_SAME=GetInterExcept(src_seq_MLM_SAME.detach().numpy(), this_vocab_list)
+        src_seq_MLM_SAME = this_src.to(device)
 
-        src_seq_LM = batch.src[:-1]
-        target_sample_LM=GetInterExcept(src_seq_LM.detach().numpy(), this_vocab_list)
+        src_seq_LM = this_src.to(device)
 
         for this_model_name in MODELS:
             this_model = torch.load(os.path.join(SAVE_MODEL_PATH,this_model_name))
             this_model.eval()
-            if this_model_name.startswith("MT") and len(target_sample_MT)>0:
-                if sample_size_count_MT>=min_sample_size:
-                    continue
+            if this_model_name.startswith("MT"):
                 this_MT_matrix_mask_in=[[],[],[],[],[],[]]
                 this_MT_matrix_mask_out=[[],[],[],[],[],[]]
-                #TODO, modify the create_mask function to make it generate different src_padding_mask
                 src_mask, trg_mask, src_padding_mask, trg_padding_mask = create_mask(src_seq_MT, trg_seq_MT, src_pad_idx, trg_pad_idx)
                 _ = this_model(src=src_seq_MT,
                                src_mask=src_mask,
@@ -102,15 +99,17 @@ for this_vocab_list in frequent_vocab_list:
                                tgt_padding_mask=trg_padding_mask,
                                memory_key_padding_mask=src_padding_mask)
 
-                this_MT_matrix_mask_in, num_tokens=GetInterValuesCCA3(this_model, target_sample_MT, NUM2WORD,
+                this_MT_matrix_mask_in, num_tokens=GetInterValuesCCA3(this_model, target_sample, NUM2WORD,
                                                                         this_MT_matrix_mask_in, NLAYERS)
-                sample_size_count_MT+=num_tokens
+                if not updated_sample:
+                    sample_size_count+=num_tokens
+                    updated_sample = True
 
                 this_MT_matrix_mask_in=np.array(this_MT_matrix_mask_in)
                 this_MT_matrix_mask_in=np.squeeze(this_MT_matrix_mask_in,1)
 
                 src_padding_mask2 = (src_seq_MT == src_pad_idx).transpose(0, 1)
-                for pos, token_id in target_sample_MT.items():
+                for pos, token_id in target_sample.items():
                     src_padding_mask2 = src_padding_mask2.logical_and((src_seq_MT == token_id).transpose(0, 1))
                 src_padding_mask2=torch.BoolTensor(src_padding_mask2)
 
@@ -136,7 +135,7 @@ for this_vocab_list in frequent_vocab_list:
                                    tgt_padding_mask=trg_padding_mask,
                                    memory_key_padding_mask=src_padding_mask)
                     this_MT_matrix_mask_out,_=GetInterValuesCCA3(this_model,
-                                                                   target_sample_MT,
+                                                                   target_sample,
                                                                    NUM2WORD,
                                                                    this_MT_matrix_mask_out,
                                                                    NLAYERS,
@@ -152,24 +151,24 @@ for this_vocab_list in frequent_vocab_list:
                     MT_matrix_mask_in=np.concatenate((MT_matrix_mask_out,this_MT_matrix_mask_in),axis=1)
                 assert MT_matrix_mask_out.shape == MT_matrix_mask_in.shape
 
-            elif this_model_name.startswith("MLM") and len(target_sample_MLM_SAME)>0:
-                if sample_size_count_MLM>=min_sample_size:
-                    continue
+            elif this_model_name.startswith("MLM"):
                 this_MLM_matrix_mask_in = [[],[],[],[],[],[]]
                 this_MLM_matrix_mask_out = [[],[],[],[],[],[]]
                 src_mask = generate_square_subsequent_mask(src_seq_MLM_SAME.size(0))
                 src_padding_mask = (src_seq_MLM_SAME == src_pad_idx).transpose(0, 1)
                 _ = this_model(src_seq_MLM_SAME, src_mask.to(device),src_padding_mask.to(device))
 
-                this_MLM_matrix_mask_in, num_tokens=GetInterValuesCCA3(this_model, target_sample_MLM_SAME, NUM2WORD,
+                this_MLM_matrix_mask_in, num_tokens=GetInterValuesCCA3(this_model, target_sample, NUM2WORD,
                                                                         this_MLM_matrix_mask_in, NLAYERS)
-                sample_size_count_MLM+=num_tokens
+                if not updated_sample:
+                    sample_size_count+=num_tokens
+                    updated_sample = True
 
                 this_MLM_matrix_mask_in=np.array(this_MLM_matrix_mask_in)
                 this_MLM_matrix_mask_in=np.squeeze(this_MLM_matrix_mask_in,1)
 
                 src_padding_mask2 = (src_seq_MLM_SAME == src_pad_idx).transpose(0, 1)
-                for pos, token_id in target_sample_MLM_SAME.items():
+                for pos, token_id in target_sample.items():
                     src_padding_mask2 = src_padding_mask2.logical_and((src_seq_MLM_SAME == token_id).transpose(0, 1))
                 src_padding_mask2=torch.BoolTensor(src_padding_mask2)
 
@@ -189,7 +188,7 @@ for this_vocab_list in frequent_vocab_list:
                 for i in range(NLAYERS):
                     _ = this_model(src_seq_MLM_SAME, src_mask.to(device),padding_mask_list[i])
                     this_MLM_matrix_mask_out,_=GetInterValuesCCA3(this_model,
-                                                                   target_sample_MLM_SAME,
+                                                                   target_sample,
                                                                    NUM2WORD,
                                                                    this_MLM_matrix_mask_out,
                                                                    NLAYERS,
@@ -205,24 +204,24 @@ for this_vocab_list in frequent_vocab_list:
                     MLM_matrix_mask_in=np.concatenate((MLM_matrix_mask_out,this_MLM_matrix_mask_in),axis=1)
                 assert MLM_matrix_mask_out.shape == MLM_matrix_mask_in.shape
 
-            elif this_model_name.startswith("LM") and len(target_sample_LM)>0:
-                if sample_size_count_LM>=min_sample_size:
-                    continue
+            elif this_model_name.startswith("LM"):
                 this_LM_matrix_mask_in = [[],[],[],[],[],[]]
                 this_LM_matrix_mask_out = [[],[],[],[],[],[]]
                 src_mask = generate_square_subsequent_mask(src_seq_LM.size(0))
                 src_padding_mask = (src_seq_LM == src_pad_idx).transpose(0, 1)
                 _ = this_model(src_seq_LM, src_mask.to(device),src_padding_mask.to(device))
 
-                this_LM_matrix_mask_in, num_tokens=GetInterValuesCCA3(this_model, target_sample_LM, NUM2WORD,
+                this_LM_matrix_mask_in, num_tokens=GetInterValuesCCA3(this_model, target_sample, NUM2WORD,
                                                                     this_LM_matrix_mask_in, NLAYERS)
-                sample_size_count_LM+=num_tokens
+                if not updated_sample:
+                    sample_size_count+=num_tokens
+                    updated_sample = True
 
                 this_LM_matrix_mask_in=np.array(this_LM_matrix_mask_in)
                 this_LM_matrix_mask_in=np.squeeze(this_LM_matrix_mask_in,1)
 
                 src_padding_mask2 = (src_seq_LM == src_pad_idx).transpose(0, 1)
-                for pos, token_id in target_sample_LM.items():
+                for pos, token_id in target_sample.items():
                     src_padding_mask2 = src_padding_mask2.logical_and((src_seq_LM == token_id).transpose(0, 1))
                 src_padding_mask2=torch.BoolTensor(src_padding_mask2)
 
@@ -242,7 +241,7 @@ for this_vocab_list in frequent_vocab_list:
                 for i in range(NLAYERS):
                     _ = this_model(src_seq_LM, src_mask.to(device),padding_mask_list[i])
                     this_LM_matrix_mask_out,_=GetInterValuesCCA3(this_model,
-                                                                   target_sample_LM,
+                                                                   target_sample,
                                                                    NUM2WORD,
                                                                    this_LM_matrix_mask_out,
                                                                    NLAYERS,
@@ -258,9 +257,7 @@ for this_vocab_list in frequent_vocab_list:
                     LM_matrix_mask_in=np.concatenate((LM_matrix_mask_out,this_LM_matrix_mask_in),axis=1)
                 assert LM_matrix_mask_out.shape == LM_matrix_mask_in.shape
 
-        if sample_size_count_LM>=min_sample_size and \
-            sample_size_count_MLM>=min_sample_size and \
-            sample_size_count_MT>=min_sample_size:
+        if sample_size_count>=min_sample_size:
             break
 
     # calculate CCA

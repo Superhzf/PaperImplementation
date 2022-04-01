@@ -249,12 +249,12 @@ def GetInterValuesCCA3(this_model, target_sample, NUM2WORD, token_reps_list, num
     """
     if target_layer is None:
         for i in range(num_layers):
-            reps=this_model.activation[f'{NUM2WORD[i+1]}_layer'].detach().numpy()
+            reps=this_model.activation[f'{NUM2WORD[i+1]}_layer'][:-1].detach().numpy()
             reps=np.squeeze(reps,1)
             reps=np.delete(reps,obj=list(target_sample.keys()),axis=0)
             token_reps_list[i].append(reps)
     else:
-        reps=this_model.activation[f'{NUM2WORD[target_layer+1]}_layer'].detach().numpy()
+        reps=this_model.activation[f'{NUM2WORD[target_layer+1]}_layer'][:-1].detach().numpy()
         reps=np.squeeze(reps,1)
         reps=np.delete(reps,obj=list(target_sample.keys()),axis=0)
         token_reps_list[target_layer].append(reps)
