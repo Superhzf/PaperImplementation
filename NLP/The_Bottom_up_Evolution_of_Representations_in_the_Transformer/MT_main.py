@@ -17,11 +17,11 @@ from models import MT_NAME
 import os
 import math
 
-
 if DEVELOPMENT_MODE:
     DATA_DIR=DATA_DIR_DEV
     EPOCHS=EPOCHS_DEV
     SYNC_EVERY_STEPS=SYNC_EVERY_BATCH_DEV
+    passed_test = False
 else:
     DATA_DIR=DATA_DIR_FULL
     EPOCHS=EPOCHS_FULL
@@ -46,12 +46,19 @@ src_vocab_size = len(field_src.vocab)
 trg_vocab_size = len(field_trg.vocab)
 
 fields = {'src':field_src , 'trg':field_trg}
-# chaning the length of training examples to 2 for testing purpose
-train = Dataset(examples=train_examples, fields=fields)
-valid = Dataset(examples=valid_examples, fields=fields)
+"""
+chaning the length of training examples to 2 for testing purpose
+BATCH_SIZE is no need to change.
+"""
+if DEVELOPMENT_MODE:
+    train = Dataset(examples=train_examples[:2], fields=fields)
+    valid = Dataset(examples=train_examples[:2], fields=fields)
+else:
+    train = Dataset(examples=train_examples, fields=fields)
+    valid = Dataset(examples=valid_examples, fields=fields)
+
 train_iter = BucketIterator(train, batch_size=BATCH_SIZE, device=device, train=True, shuffle=False)
 valid_iter = BucketIterator(valid, batch_size=BATCH_SIZE, device=device, shuffle=False)
-
 model=SepSeq2SeqTransformer(src_vocab_size=src_vocab_size,
                          d_model=D_MODEL,
                          nhead=NHEAD,
@@ -72,7 +79,8 @@ round=0
 
 for epoch in range(1, EPOCHS+1):
     start_time = timer()
-    train_loss = train_epoch(model, optimizer, loss_fn, train_iter, src_pad_idx, trg_pad_idx,epoch, SYNC_EVERY_STEPS)
+    train_loss = train_epoch(model, optimizer, loss_fn, train_iter, src_pad_idx,
+                            trg_pad_idx,epoch, SYNC_EVERY_STEPS)
     end_time = timer()
     valid_loss = evaluate(model, loss_fn, train_iter,trg_pad_idx,src_pad_idx)
     valid_ppl = math.exp(valid_loss)
@@ -92,5 +100,14 @@ for epoch in range(1, EPOCHS+1):
             f"Best validation loss: {best_loss:.2f}|"
             f"Best validation ppl: {best_ppl:.2f}|"
             f"Epoch time = {(end_time - start_time):.2f}s")
+    if DEVELOPMENT_MODE and math.isclose(valid_loss,0,rel_tol=0.0001,abs_tol=0.0001):
+        passed_test = True
+        break
 
-print(f"Training is done! The best model has been save to {os.path.join(SAVE_MODEL_PATH,MT_NAME)}")
+if not DEVELOPMENT_MODE:
+    print(f"Training is done! The best model has been save to {os.path.join(SAVE_MODEL_PATH,MT_NAME)}")
+else:
+    if passed_test:
+        print("Congrats! Your model has passed the pre-test!")
+    else:
+        assert 1==0, "Your model cannot overfit one batch with two observations, check it out!"

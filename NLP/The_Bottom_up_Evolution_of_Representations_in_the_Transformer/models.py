@@ -24,7 +24,7 @@ FFN_HID_DIM = 2048
 NLAYERS = 6
 NHEAD = 8
 DROPOUT = 0.1
-EPOCHS_DEV = 1
+EPOCHS_DEV = 400
 EPOCHS_FULL = 1000
 BATCH_SIZE = 1000
 LM_NAME='LM.pt'
@@ -43,7 +43,7 @@ Per the paper, BATCH_SIZE=16000, so BATCH_SIZE*SYNC_EVERY_BATCH_FULL should be
 Ref:
 https://discuss.pytorch.org/t/why-do-we-need-to-set-the-gradients-manually-to-zero-in-pytorch/4903/20?u=alband
 """
-SYNC_EVERY_BATCH_DEV = 2
+SYNC_EVERY_BATCH_DEV = 1
 SYNC_EVERY_BATCH_FULL = 16
 N_WARMUP_STEPS = 4000
 BETAS = (0.9, 0.98)

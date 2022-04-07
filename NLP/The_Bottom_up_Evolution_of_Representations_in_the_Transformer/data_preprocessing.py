@@ -76,10 +76,11 @@ procedure should stop. Per the authors, they monitor the performance on the
 validation set and stop the training when the performance does not improve for
 a while (no exact round is released). I choose NO_BETTER_THAN_ROUND=33 because
 the parameters will not be updated every 16 epochs. I think the parameters
-have to be updated at least 2 times before the training stops.
+have to be updated at least 10 times before the training stops. This is s.t.
+change.
 """
 SAVE_MODEL_PATH='./data/TrainedModel/'
-NO_BETTER_THAN_ROUND=33
+NO_BETTER_THAN_ROUND=330
 
 def mkdir_if_needed(dir_name):
     if not os.path.isdir(dir_name):
