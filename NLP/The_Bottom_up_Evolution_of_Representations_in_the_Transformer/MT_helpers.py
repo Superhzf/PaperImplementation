@@ -35,7 +35,6 @@ def create_mask(src, tgt, src_pad_idx, trg_pad_idx):
 def train_epoch(model, optimizer, loss_fn, train_iter, src_pad_idx, trg_pad_idx, epoch, sync_every_steps):
     model.train()
     losses=0
-    sync_loss=0
     i=1
     optimizer.zero_grad()
     for batch in train_iter:
