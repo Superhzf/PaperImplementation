@@ -46,6 +46,7 @@ src_vocab_size = len(field_src.vocab)
 trg_vocab_size = len(field_trg.vocab)
 
 fields = {'src':field_src , 'trg':field_trg}
+# chaning the length of training examples to 2 for testing purpose
 train = Dataset(examples=train_examples, fields=fields)
 valid = Dataset(examples=valid_examples, fields=fields)
 train_iter = BucketIterator(train, batch_size=BATCH_SIZE, device=device, train=True, shuffle=False)
@@ -73,11 +74,11 @@ for epoch in range(1, EPOCHS+1):
     start_time = timer()
     train_loss = train_epoch(model, optimizer, loss_fn, train_iter, src_pad_idx, trg_pad_idx,epoch, SYNC_EVERY_STEPS)
     end_time = timer()
-    valid_loss = evaluate(model,BATCH_SIZE, loss_fn, valid_iter)
-    valid_ppl = math.exp(val_loss)
+    valid_loss = evaluate(model, loss_fn, train_iter,trg_pad_idx,src_pad_idx)
+    valid_ppl = math.exp(valid_loss)
     if valid_loss<best_loss:
         best_loss=valid_loss
-        best_ppl=val_ppl
+        best_ppl=valid_ppl
         best_model=model
         round=0
     else:

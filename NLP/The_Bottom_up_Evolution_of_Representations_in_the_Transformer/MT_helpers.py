@@ -95,7 +95,7 @@ def train_epoch(model, optimizer, loss_fn, train_iter, src_pad_idx, trg_pad_idx,
 
     return losses / len(train_iter)
 
-def evaluate(model, loss_fn, val_iter):
+def evaluate(model, loss_fn, val_iter,trg_pad_idx,src_pad_idx):
     model.eval()
     losses = 0
     i=0
