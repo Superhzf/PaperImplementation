@@ -85,7 +85,7 @@ for epoch in range(1, EPOCHS+1):
         round+=1
         if round>=NO_BETTER_THAN_ROUND:
             torch.save(best_model, os.path.join(SAVE_MODEL_PATH,MT_NAME))
-        break
+            break
     print(f"Epoch: {epoch}|Train loss: {train_loss:.2f}|"
             f"Current validation loss: {valid_loss:.2f}|"
             f"Current validation ppl: {valid_ppl:.2f}|"
