@@ -98,7 +98,6 @@ def train_epoch(model, optimizer, loss_fn, train_iter, src_pad_idx, trg_pad_idx,
 def evaluate(model, loss_fn, val_iter,trg_pad_idx,src_pad_idx):
     model.eval()
     losses = 0
-    i=0
     for batch in val_iter:
         src = batch.src
         trg = batch.trg
@@ -117,6 +116,5 @@ def evaluate(model, loss_fn, val_iter,trg_pad_idx,src_pad_idx):
 
         loss = loss_fn(logits.reshape(-1, logits.shape[-1]), gold.reshape(-1))
         losses += loss.item()
-        print(f"Round {i} in the validation stage")
 
     return losses / len(val_iter)
