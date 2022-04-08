@@ -47,7 +47,7 @@ trg_vocab_size = len(field_trg.vocab)
 
 fields = {'src':field_src , 'trg':field_trg}
 """
-chaning the length of training examples to 2 for testing purpose
+Change the length of training examples to 2 for development purpose.
 BATCH_SIZE is no need to change.
 """
 if DEVELOPMENT_MODE:
