@@ -14,6 +14,7 @@ seed_src_tok_emb =  1234
 seed_decoder = 5678
 seed_tgt_tok_emb = 4321
 seed_transform_encoderlayer = 7890
+seed_transform_decoderlayer = 9870
 """
 Similarly, we need to set up the same parameters for
 different tasks (LM, MLM, MT). The values come from the paper
@@ -209,8 +210,6 @@ class SepTransformerModel(nn.Module):
         self.src_tok_emb = nn.Embedding(src_vocab_size, d_model)
         self.pos_encoder = PositionalEncoding(d_model, dropout)
         self.num_encoder_layer=num_encoder_layer
-        # self.transformer_encoder=nn.ModuleList([TransformerEncoderLayer(d_model, nhead, dim_feedforward, dropout)
-        #                                         for _ in range(self.num_encoder_layer)])
         self.transformer_encoder=nn.ModuleList()
         for this_layer in range(self.num_encoder_layer):
             torch.manual_seed(seed_transform_encoderlayer+this_layer)
@@ -284,6 +283,7 @@ class Seq2SeqTransformer(TransformerModel):
                          False)
         self.decoder=nn.Linear(d_model, tgt_vocab_size)
         self.tgt_tok_emb = nn.Embedding(tgt_vocab_size, d_model)
+        torch.manual_seed(seed_transform_decoderlayer)
         decoder_layers = TransformerDecoderLayer(d_model=d_model,
                                                  nhead=nhead,
                                                  dim_feedforward=dim_feedforward,
@@ -354,6 +354,7 @@ class SepSeq2SeqTransformer(SepTransformerModel):
                          False)
         self.decoder=nn.Linear(d_model, tgt_vocab_size)
         self.tgt_tok_emb = nn.Embedding(tgt_vocab_size, d_model)
+        torch.manual_seed(seed_transform_decoderlayer)
         decoder_layers = TransformerDecoderLayer(d_model=d_model,
                                                  nhead=nhead,
                                                  dim_feedforward=dim_feedforward,
