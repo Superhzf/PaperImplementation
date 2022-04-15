@@ -17,6 +17,9 @@ from models import MT_NAME
 import os
 import math
 
+"""
+DEV mode includes 5001 sentences while the FULL mode includes ~5.9M sentences.
+"""
 if DEVELOPMENT_MODE:
     DATA_DIR=DATA_DIR_DEV
     EPOCHS=EPOCHS_DEV
