@@ -3,10 +3,9 @@ Notes:
 This script generates data for the pictures in part 5.2.1 and 5.2.2.
 
 The authors mention, in 5.2.1, that all tokens come from 5000
-sentences which equal the number of sentences in train_iter. Hence, we don't
-have to check how many sentences have been iterated. In other words,
-maximum_sentence_count is not necessary, but I keep it for the DEVELOPMENT
-prupose.
+sentences; however, the entire dataset includes 5.9M sentences and they do not
+mention how those 5000 sentences are selected. I will select the first 5000
+sentences for now for analytics.
 """
 
 import os
