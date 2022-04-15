@@ -1,7 +1,7 @@
 from datasets import load_dataset
 import os
 import sys
-from data_preprocessing2 import mkdir_if_needed
+from data_preprocessing import mkdir_if_needed
 
 DATA_FOLDER = './data/raw'
 VALID_EN = 'valid_en.txt'
