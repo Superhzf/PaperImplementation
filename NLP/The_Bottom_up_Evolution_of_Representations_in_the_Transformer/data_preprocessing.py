@@ -80,7 +80,8 @@ have to be updated at least 10 times before the training stops. This is s.t.
 change.
 """
 SAVE_MODEL_PATH='./data/TrainedModel/'
-NO_BETTER_THAN_ROUND=330
+NO_BETTER_THAN_ROUND_FULL=330
+NO_BETTER_THAN_ROUND_DEV=3
 
 def mkdir_if_needed(dir_name):
     if not os.path.isdir(dir_name):

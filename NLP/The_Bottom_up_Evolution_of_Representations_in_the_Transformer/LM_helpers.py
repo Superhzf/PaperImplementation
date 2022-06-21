@@ -40,7 +40,7 @@ def train_epoch(model: nn.Module, train_iter, criterion, ntokens, optimizer,
         # find out the index of eos_idx
         eos_pos = (src_seq == eos_idx).int().argmax(axis=0)
         # append another eos_idx after eos_idx
-        src_seq = torch.stack([torch.cat([xi[:bpi], torch.tensor([eos_idx]), xi[bpi:]]) \
+        src_seq = torch.stack([torch.cat([xi[:bpi], torch.tensor([eos_idx]).to(device), xi[bpi:]]) \
                         for xi, bpi in zip(src_seq.unbind(1), eos_pos)],dim=1)
         target = src_seq[2:].view(-1).to(device)
         seq_len=input.size(0)
@@ -67,22 +67,23 @@ def train_epoch(model: nn.Module, train_iter, criterion, ntokens, optimizer,
 
     return losses / len(train_iter)
 
-def evaluate(model: nn.Module, eval_data: Tensor, ntokens: int, criterion):
+def evaluate(model: nn.Module, eval_data: Tensor, ntokens: int, criterion,src_pad_idx,eos_idx):
     model.eval()
     losses = 0
     i=1
     for batch in eval_data:
-        src = batch.src
+        src_seq = batch.src
         input = src_seq[1:].to(device)
         eos_pos = (src_seq == eos_idx).int().argmax(axis=0)
-        src_seq = torch.stack([torch.cat([xi[:bpi], torch.tensor([eos_idx]), xi[bpi:]]) for xi, bpi in zip(src_seq.unbind(1), eos_pos)],dim=1)
-        target = src_seq[1:].view(-1).to(device)
+        src_seq = torch.stack([torch.cat([xi[:bpi], torch.tensor([eos_idx]).to(device), xi[bpi:]]) \
+                    for xi, bpi in zip(src_seq.unbind(1), eos_pos)],dim=1)
+        target = src_seq[2:].view(-1).to(device)
         seq_len=input.size(0)
         src_mask=generate_square_subsequent_mask(seq_len).to(device)
-        output = model(data, src_mask)
-        loss = criterion(output.view(-1, ntokens), targets)
+        src_padding_mask = (input == src_pad_idx).transpose(0, 1)
+        output = model(input, src_mask,src_padding_mask)
+        loss = criterion(output.view(-1, ntokens), target)
         losses += loss.item()
-        print(f"Round {i} in the validation stage")
         i+=1
 
-    return losses / len(val_iter)
+    return losses / len(eval_data)
