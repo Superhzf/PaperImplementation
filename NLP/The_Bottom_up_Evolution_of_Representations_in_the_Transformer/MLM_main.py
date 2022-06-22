@@ -8,7 +8,7 @@ import torch
 from data_preprocessing import DEVELOPMENT_MODE
 from data_preprocessing import SAVE_VOCAB_SRC, SAVE_VOCAB_TRG, SAVE_DATA_MT_TRAIN, SAVE_DATA_MT_VAL
 from data_preprocessing import DATA_DIR_DEV, DATA_DIR_FULL, PAD_WORD
-from data_preprocessing import SAVE_MODEL_PATH, NO_BETTER_THAN_ROUND
+from data_preprocessing import SAVE_MODEL_PATH, NO_BETTER_THAN_ROUND_DEV,NO_BETTER_THAN_ROUND_FULL
 from models import D_MODEL, FFN_HID_DIM, NLAYERS, NHEAD, BATCH_SIZE, DROPOUT
 from models import EPOCHS_DEV, EPOCHS_FULL, SYNC_EVERY_BATCH_DEV, SYNC_EVERY_BATCH_FULL
 from models import SepTransformerModel, LOSS_FN, ScheduledOptim
@@ -22,11 +22,13 @@ if DEVELOPMENT_MODE:
     DATA_DIR=DATA_DIR_DEV
     EPOCHS=EPOCHS_DEV
     SYNC_EVERY_STEPS=SYNC_EVERY_BATCH_DEV
+    NO_BETTER_THAN_ROUND = NO_BETTER_THAN_ROUND_DEV
 
 else:
     DATA_DIR=DATA_DIR_FULL
     EPOCHS=EPOCHS_FULL
     SYNC_EVERY_STEPS=SYNC_EVERY_BATCH_FULL
+    NO_BETTER_THAN_ROUND = NO_BETTER_THAN_ROUND_FULL
 
 
 vocab_pkl_src = os.path.join(DATA_DIR, SAVE_VOCAB_SRC)
@@ -44,6 +46,10 @@ trg_pad_idx = field_trg.vocab.stoi[PAD_WORD]
 
 src_vocab_size = len(field_src.vocab)
 trg_vocab_size = len(field_trg.vocab)
+
+MASK = src_vocab_size-1
+while MASK in field_src.vocab.freqs.values():
+    MASK-=1
 
 fields = {'src':field_src , 'trg':field_trg}
 train = Dataset(examples=train_examples, fields=fields)
@@ -69,9 +75,9 @@ round=0
 # train the model
 for epoch in range(1, EPOCHS + 1):
     epoch_start_time = time.time()
-    train_loss = train_epoch(model,train_iter, criterion, src_vocab_size, optimizer, epoch, src_pad_idx, SYNC_EVERY_STEPS)
+    train_loss = train_epoch(model,train_iter, criterion, src_vocab_size, optimizer, epoch, src_pad_idx, SYNC_EVERY_STEPS,MASK)
     elapsed = time.time() - epoch_start_time
-    valid_loss = evaluate(model, valid_iter, src_vocab_size, criterion, src_pad_idx)
+    valid_loss = evaluate(model, valid_iter, src_vocab_size, criterion, src_pad_idx,MASK)
     train_ppl = math.exp(train_loss)
     valid_ppl = math.exp(valid_loss)
     if valid_loss<best_loss:
@@ -83,7 +89,7 @@ for epoch in range(1, EPOCHS + 1):
         round+=1
         if round>=NO_BETTER_THAN_ROUND:
             torch.save(best_model, os.path.join(SAVE_MODEL_PATH,MLM_NAME))
-        break
+            break
     print('-' * 89)
     print(f"Epoch: {epoch}|Train loss: {train_loss:.2f}|"
             f"Current validation loss: {valid_loss:.2f}|"
@@ -93,4 +99,7 @@ for epoch in range(1, EPOCHS + 1):
             f"Epoch time = {elapsed:.2f}s")
     print('-' * 89)
 
+if epoch == EPOCHS:
+    print("All the epochs have been executed!")
+    torch.save(best_model, os.path.join(SAVE_MODEL_PATH,MLM_NAME))
 print(f"Training is done! The best model has been save to {os.path.join(SAVE_MODEL_PATH,MLM_NAME)}")
