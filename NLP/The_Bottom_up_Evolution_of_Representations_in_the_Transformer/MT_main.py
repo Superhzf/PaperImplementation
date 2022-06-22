@@ -9,7 +9,7 @@ import torch
 from data_preprocessing import DEVELOPMENT_MODE
 from data_preprocessing import SAVE_VOCAB_SRC, SAVE_VOCAB_TRG, SAVE_DATA_MT_TRAIN, SAVE_DATA_MT_VAL
 from data_preprocessing import DATA_DIR_DEV, DATA_DIR_FULL, PAD_WORD
-from data_preprocessing import SAVE_MODEL_PATH, NO_BETTER_THAN_ROUND
+from data_preprocessing import SAVE_MODEL_PATH, NO_BETTER_THAN_ROUND_FULL,NO_BETTER_THAN_ROUND_DEV
 from models import D_MODEL, FFN_HID_DIM, NLAYERS, NHEAD, BATCH_SIZE, DROPOUT
 from models import EPOCHS_DEV, EPOCHS_FULL, SYNC_EVERY_BATCH_DEV, SYNC_EVERY_BATCH_FULL
 from models import SepSeq2SeqTransformer, LOSS_FN, ScheduledOptim
@@ -25,10 +25,12 @@ if DEVELOPMENT_MODE:
     EPOCHS=EPOCHS_DEV
     SYNC_EVERY_STEPS=SYNC_EVERY_BATCH_DEV
     passed_test = False
+    NO_BETTER_THAN_ROUND = NO_BETTER_THAN_ROUND_DEV
 else:
     DATA_DIR=DATA_DIR_FULL
     EPOCHS=EPOCHS_FULL
     SYNC_EVERY_STEPS=SYNC_EVERY_BATCH_FULL
+    NO_BETTER_THAN_ROUND = NO_BETTER_THAN_ROUND_FULL
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -53,12 +55,8 @@ fields = {'src':field_src , 'trg':field_trg}
 Change the length of training examples to 2 for development purpose.
 BATCH_SIZE is no need to change.
 """
-if DEVELOPMENT_MODE:
-    train = Dataset(examples=train_examples[:2], fields=fields)
-    valid = Dataset(examples=train_examples[:2], fields=fields)
-else:
-    train = Dataset(examples=train_examples, fields=fields)
-    valid = Dataset(examples=valid_examples, fields=fields)
+train = Dataset(examples=train_examples, fields=fields)
+valid = Dataset(examples=valid_examples, fields=fields)
 
 train_iter = BucketIterator(train, batch_size=BATCH_SIZE, device=device, train=True, shuffle=False)
 valid_iter = BucketIterator(valid, batch_size=BATCH_SIZE, device=device, shuffle=False)
@@ -85,7 +83,7 @@ for epoch in range(1, EPOCHS+1):
     train_loss = train_epoch(model, optimizer, loss_fn, train_iter, src_pad_idx,
                             trg_pad_idx,epoch, SYNC_EVERY_STEPS)
     end_time = timer()
-    valid_loss = evaluate(model, loss_fn, train_iter,trg_pad_idx,src_pad_idx)
+    valid_loss = evaluate(model, loss_fn, valid_iter,trg_pad_idx,src_pad_idx)
     valid_ppl = math.exp(valid_loss)
     if valid_loss<best_loss:
         best_loss=valid_loss
@@ -103,14 +101,9 @@ for epoch in range(1, EPOCHS+1):
             f"Best validation loss: {best_loss:.2f}|"
             f"Best validation ppl: {best_ppl:.2f}|"
             f"Epoch time = {(end_time - start_time):.2f}s")
-    if DEVELOPMENT_MODE and math.isclose(valid_loss,0,rel_tol=0.0001,abs_tol=0.0001):
-        passed_test = True
-        break
 
-if not DEVELOPMENT_MODE:
-    print(f"Training is done! The best model has been save to {os.path.join(SAVE_MODEL_PATH,MT_NAME)}")
-else:
-    if passed_test:
-        print("Congrats! Your model has passed the pre-test!")
-    else:
-        assert 1==0, "Your model cannot overfit one batch with two observations, check it out!"
+if epoch == EPOCHS:
+    print("All the epochs have been executed!")
+    torch.save(best_model, os.path.join(SAVE_MODEL_PATH,MT_NAME))
+
+print(f"Training is done! The best model has been save to {os.path.join(SAVE_MODEL_PATH,MT_NAME)}")

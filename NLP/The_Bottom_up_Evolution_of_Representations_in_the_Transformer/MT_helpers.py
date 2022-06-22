@@ -67,6 +67,11 @@ def train_epoch(model, optimizer, loss_fn, train_iter, src_pad_idx, trg_pad_idx,
         trg_seq = trg_seq.to(device)
         src_mask, trg_mask, src_padding_mask, trg_padding_mask = create_mask(src_seq, trg_seq, src_pad_idx, trg_pad_idx)
 
+        src_mask = src_mask.to(device)
+        trg_mask = trg_mask.to(device)
+        src_padding_mask = src_padding_mask.to(device)
+        trg_padding_mask = trg_padding_mask.to(device)
+
         logits = model(src=src_seq,
                        src_mask=src_mask,
                        trg=trg_seq,
@@ -105,6 +110,11 @@ def evaluate(model, loss_fn, val_iter,trg_pad_idx,src_pad_idx):
         trg_seq, gold = map(lambda x: x.to(device), patch_trg(trg, trg_pad_idx))
         trg_seq = trg_seq.to(device)
         src_mask, trg_mask, src_padding_mask, trg_padding_mask = create_mask(src_seq, trg_seq, src_pad_idx, trg_pad_idx)
+
+        src_mask = src_mask.to(device)
+        trg_mask = trg_mask.to(device)
+        src_padding_mask = src_padding_mask.to(device)
+        trg_padding_mask = trg_padding_mask.to(device)
 
         logits = model(src=src_seq,
                        src_mask=src_mask,
