@@ -47,6 +47,9 @@ def write2file(data_folder, dataset, src_file_name, trg_file_name, generate_data
 def main():
     # https://huggingface.co/docs/datasets/package_reference/loading_methods.html#datasets.load_dataset
     # It may take about 20 mins to download the dataset for the first time.
+    """
+    The raw full dataset includes 5,904,128 sentences.
+    """
     dataset = load_dataset(path='wmt17',name="de-en",split=['train','validation'])
     write2file(DATA_FOLDER, dataset[1], VALID_EN, VALID_DE)
     write2file(DATA_FOLDER, dataset[0], TRAIN_EN_FULL, TRAIN_DE_FULL)
