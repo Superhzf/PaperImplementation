@@ -37,6 +37,8 @@ def write2file(data_folder, dataset, src_file_name, trg_file_name, generate_data
             trg_outf.write('\n')
             if generate_data_dev_mode and index>=5000:
                 break;
+            elif not generate_data_dev_mode and index >= 500000:
+                break
     src_outf.close()
     trg_outf.close()
     sys.stderr.write(f"{index+1} sentences have been written to {os.path.join(data_folder, src_file_name)}\

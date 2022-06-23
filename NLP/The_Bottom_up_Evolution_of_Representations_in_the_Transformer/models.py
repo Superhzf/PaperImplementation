@@ -26,7 +26,15 @@ NLAYERS = 6
 NHEAD = 8
 DROPOUT = 0.1
 EPOCHS_DEV = 1000
-EPOCHS_FULL = 100000
+"""
+EPOCHS_FULL comes from Attention Is All You Need, where the model is trained
+100,000 steps (I believe one step means updating parameter once).
+
+In this case, we have 500,000 sentences and batch size = 128, parameters will be
+updated every 125 batches, so one epoch includes 500000/128/125 ~31 steps.
+I will train 5000 steps which is ~160 epochs.
+"""
+EPOCHS_FULL = 160
 BATCH_SIZE = 128
 LM_NAME='LM.pt'
 MLM_NAME='MLM.pt'
