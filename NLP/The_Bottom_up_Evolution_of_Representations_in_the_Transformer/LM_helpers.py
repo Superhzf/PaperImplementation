@@ -60,9 +60,10 @@ def train_epoch(model: nn.Module, train_iter, criterion, ntokens, optimizer,
         # print the information at each batch
         s_this_batch=(time.time() - start_time)
         curr_ppl = math.exp(curr_loss)
-        print(f'| epoch {epoch:3d} | {i:5d} batch | '
-                  f's/batch {s_this_batch:5.2f} | '
-                  f'loss {curr_loss:5.2f} | ppl {curr_ppl:8.2f}')
+        if i%sync_every_steps == 0:
+            print(f'| epoch {epoch:3d} | {i:5d} batch | '
+                      f's/batch {s_this_batch:5.2f} | '
+                      f'loss {curr_loss:5.2f} | ppl {curr_ppl:8.2f}')
         i+=1
 
     return losses / len(train_iter)
