@@ -5,7 +5,7 @@ This folder aims to implement the code and reproduce the results of the vanilla
 
 Generally, I follow the setups mentioned by the paper to my best knowledge (including # of layers, filter size, epochs, augmentation, and so on so forth).
 
-As a result, this implementation can see `90.51%` accuracy on the test set based on the setups below. If normalizing the dataset using the accurate mean and std, probably it will further improve the accuracy.
+As a result, the 20-layer model on this implementation can see `90.51%` accuracy on the test vs `91.25` reported by the paper. If normalizing the dataset using the accurate mean and std, probably it will further improve the accuracy.
 
 `log_2022` is the log file using `seed=2022` and `log_2023` is the log file using `seed=2023`. `log_2022_v2` is the log file running on the bottleneck block with `seed=2022`. You may have to write extra code to generate the log file yourself. I run the code on a machine using `sbatch` and the log file is generated automatically.
 
