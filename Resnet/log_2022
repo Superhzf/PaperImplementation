@@ -1,0 +1,338 @@
+Arguments are parsed!
+args.seed 2022
+args.resnet_version 1
+args.resnet_size 3
+args.num_classes 10
+args.batch 128
+args.lr 0.1
+args.drop 0.0
+Downloading https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz to ./data/cifar-10-python.tar.gz
+Extracting ./data/cifar-10-python.tar.gz to ./data
+Files already downloaded and verified
+Epoch 0 training loss: 1.515 training accuracy: 44.170%
+Seconds passed in this epoch:19.361998 | Seconds passed since the training starts:19.362007
+Epoch 1 training loss: 1.113 training accuracy: 60.076%
+Seconds passed in this epoch:10.847339 | Seconds passed since the training starts:30.209382
+Epoch 2 training loss: 0.955 training accuracy: 66.418%
+Seconds passed in this epoch:10.525483 | Seconds passed since the training starts:40.734893
+Epoch 3 training loss: 0.829 training accuracy: 70.866%
+Seconds passed in this epoch:10.475757 | Seconds passed since the training starts:51.210682
+Epoch 4 training loss: 0.738 training accuracy: 74.232%
+Seconds passed in this epoch:10.703003 | Seconds passed since the training starts:61.913711
+Epoch 5 training loss: 0.678 training accuracy: 76.498%
+Seconds passed in this epoch:11.062358 | Seconds passed since the training starts:72.9761
+Epoch 6 training loss: 0.626 training accuracy: 78.146%
+Seconds passed in this epoch:11.252506 | Seconds passed since the training starts:84.228632
+Epoch 7 training loss: 0.597 training accuracy: 79.416%
+Seconds passed in this epoch:10.871053 | Seconds passed since the training starts:95.099715
+Epoch 8 training loss: 0.555 training accuracy: 80.726%
+Seconds passed in this epoch:10.454594 | Seconds passed since the training starts:105.554337
+Epoch 9 training loss: 0.527 training accuracy: 81.724%
+Seconds passed in this epoch:10.679478 | Seconds passed since the training starts:116.233842
+Epoch 10 training loss: 0.508 training accuracy: 82.554%
+Seconds passed in this epoch:10.809855 | Seconds passed since the training starts:127.043725
+Epoch 11 training loss: 0.490 training accuracy: 82.960%
+Seconds passed in this epoch:10.575013 | Seconds passed since the training starts:137.618764
+Epoch 12 training loss: 0.475 training accuracy: 83.596%
+Seconds passed in this epoch:10.894294 | Seconds passed since the training starts:148.51309
+Epoch 13 training loss: 0.459 training accuracy: 84.118%
+Seconds passed in this epoch:10.386419 | Seconds passed since the training starts:158.899535
+Epoch 14 training loss: 0.453 training accuracy: 84.308%
+Seconds passed in this epoch:10.722207 | Seconds passed since the training starts:169.621767
+Epoch 15 training loss: 0.439 training accuracy: 84.714%
+Seconds passed in this epoch:10.534228 | Seconds passed since the training starts:180.15602
+Epoch 16 training loss: 0.432 training accuracy: 84.804%
+Seconds passed in this epoch:10.295979 | Seconds passed since the training starts:190.452027
+Epoch 17 training loss: 0.419 training accuracy: 85.612%
+Seconds passed in this epoch:10.01857 | Seconds passed since the training starts:200.470624
+Epoch 18 training loss: 0.408 training accuracy: 85.896%
+Seconds passed in this epoch:10.644141 | Seconds passed since the training starts:211.114795
+Epoch 19 training loss: 0.405 training accuracy: 85.930%
+Seconds passed in this epoch:10.626266 | Seconds passed since the training starts:221.741087
+Epoch 20 training loss: 0.394 training accuracy: 86.354%
+Seconds passed in this epoch:10.752146 | Seconds passed since the training starts:232.49326
+Epoch 21 training loss: 0.386 training accuracy: 86.734%
+Seconds passed in this epoch:10.729307 | Seconds passed since the training starts:243.222592
+Epoch 22 training loss: 0.374 training accuracy: 86.892%
+Seconds passed in this epoch:11.442069 | Seconds passed since the training starts:254.664686
+Epoch 23 training loss: 0.379 training accuracy: 86.922%
+Seconds passed in this epoch:11.26734 | Seconds passed since the training starts:265.932052
+Epoch 24 training loss: 0.367 training accuracy: 87.276%
+Seconds passed in this epoch:10.578355 | Seconds passed since the training starts:276.510436
+Epoch 25 training loss: 0.364 training accuracy: 87.288%
+Seconds passed in this epoch:10.362712 | Seconds passed since the training starts:286.873174
+Epoch 26 training loss: 0.361 training accuracy: 87.608%
+Seconds passed in this epoch:11.126946 | Seconds passed since the training starts:298.000149
+Epoch 27 training loss: 0.352 training accuracy: 87.718%
+Seconds passed in this epoch:11.068887 | Seconds passed since the training starts:309.069065
+Epoch 28 training loss: 0.350 training accuracy: 87.766%
+Seconds passed in this epoch:10.324322 | Seconds passed since the training starts:319.393414
+Epoch 29 training loss: 0.344 training accuracy: 88.044%
+Seconds passed in this epoch:10.783619 | Seconds passed since the training starts:330.17706
+Epoch 30 training loss: 0.344 training accuracy: 88.078%
+Seconds passed in this epoch:10.609211 | Seconds passed since the training starts:340.786298
+Epoch 31 training loss: 0.338 training accuracy: 88.274%
+Seconds passed in this epoch:10.596084 | Seconds passed since the training starts:351.382407
+Epoch 32 training loss: 0.338 training accuracy: 88.220%
+Seconds passed in this epoch:11.050069 | Seconds passed since the training starts:362.432502
+Epoch 33 training loss: 0.337 training accuracy: 88.338%
+Seconds passed in this epoch:11.448994 | Seconds passed since the training starts:373.881523
+Epoch 34 training loss: 0.328 training accuracy: 88.636%
+Seconds passed in this epoch:10.433332 | Seconds passed since the training starts:384.314882
+Epoch 35 training loss: 0.326 training accuracy: 88.630%
+Seconds passed in this epoch:10.916415 | Seconds passed since the training starts:395.231328
+Epoch 36 training loss: 0.320 training accuracy: 88.976%
+Seconds passed in this epoch:10.946141 | Seconds passed since the training starts:406.177496
+Epoch 37 training loss: 0.321 training accuracy: 88.754%
+Seconds passed in this epoch:10.665284 | Seconds passed since the training starts:416.842805
+Epoch 38 training loss: 0.314 training accuracy: 89.160%
+Seconds passed in this epoch:10.521272 | Seconds passed since the training starts:427.364103
+Epoch 39 training loss: 0.318 training accuracy: 88.926%
+Seconds passed in this epoch:10.46787 | Seconds passed since the training starts:437.832
+Epoch 40 training loss: 0.316 training accuracy: 89.054%
+Seconds passed in this epoch:10.49631 | Seconds passed since the training starts:448.328338
+Epoch 41 training loss: 0.305 training accuracy: 89.408%
+Seconds passed in this epoch:10.623819 | Seconds passed since the training starts:458.952183
+Epoch 42 training loss: 0.311 training accuracy: 89.186%
+Seconds passed in this epoch:10.792468 | Seconds passed since the training starts:469.744676
+Epoch 43 training loss: 0.300 training accuracy: 89.532%
+Seconds passed in this epoch:11.412423 | Seconds passed since the training starts:481.157125
+Epoch 44 training loss: 0.310 training accuracy: 89.240%
+Seconds passed in this epoch:10.963974 | Seconds passed since the training starts:492.121133
+Epoch 45 training loss: 0.302 training accuracy: 89.570%
+Seconds passed in this epoch:10.695264 | Seconds passed since the training starts:502.816423
+Epoch 46 training loss: 0.295 training accuracy: 89.736%
+Seconds passed in this epoch:10.869897 | Seconds passed since the training starts:513.686346
+Epoch 47 training loss: 0.300 training accuracy: 89.672%
+Seconds passed in this epoch:10.971711 | Seconds passed since the training starts:524.658082
+Epoch 48 training loss: 0.295 training accuracy: 89.634%
+Seconds passed in this epoch:10.795817 | Seconds passed since the training starts:535.453925
+Epoch 49 training loss: 0.297 training accuracy: 89.662%
+Seconds passed in this epoch:10.208968 | Seconds passed since the training starts:545.662919
+Epoch 50 training loss: 0.292 training accuracy: 89.914%
+Seconds passed in this epoch:10.472126 | Seconds passed since the training starts:556.135072
+Epoch 51 training loss: 0.293 training accuracy: 89.742%
+Seconds passed in this epoch:10.829402 | Seconds passed since the training starts:566.964499
+Epoch 52 training loss: 0.292 training accuracy: 89.770%
+Seconds passed in this epoch:11.125712 | Seconds passed since the training starts:578.090238
+Epoch 53 training loss: 0.288 training accuracy: 89.886%
+Seconds passed in this epoch:10.462475 | Seconds passed since the training starts:588.552745
+Epoch 54 training loss: 0.286 training accuracy: 90.060%
+Seconds passed in this epoch:11.450995 | Seconds passed since the training starts:600.003767
+Epoch 55 training loss: 0.290 training accuracy: 89.858%
+Seconds passed in this epoch:10.814683 | Seconds passed since the training starts:610.818477
+Epoch 56 training loss: 0.289 training accuracy: 89.994%
+Seconds passed in this epoch:10.368381 | Seconds passed since the training starts:621.186885
+Epoch 57 training loss: 0.281 training accuracy: 90.000%
+Seconds passed in this epoch:10.82058 | Seconds passed since the training starts:632.007493
+Epoch 58 training loss: 0.284 training accuracy: 90.096%
+Seconds passed in this epoch:10.886425 | Seconds passed since the training starts:642.893944
+Epoch 59 training loss: 0.279 training accuracy: 90.292%
+Seconds passed in this epoch:10.216842 | Seconds passed since the training starts:653.11081
+Epoch 60 training loss: 0.277 training accuracy: 90.266%
+Seconds passed in this epoch:9.456519 | Seconds passed since the training starts:662.567364
+Epoch 61 training loss: 0.274 training accuracy: 90.476%
+Seconds passed in this epoch:10.064535 | Seconds passed since the training starts:672.631923
+Epoch 62 training loss: 0.277 training accuracy: 90.482%
+Seconds passed in this epoch:9.77568 | Seconds passed since the training starts:682.407629
+Epoch 63 training loss: 0.276 training accuracy: 90.292%
+Seconds passed in this epoch:9.356968 | Seconds passed since the training starts:691.764622
+Epoch 64 training loss: 0.281 training accuracy: 90.198%
+Seconds passed in this epoch:9.408182 | Seconds passed since the training starts:701.172828
+Epoch 65 training loss: 0.274 training accuracy: 90.444%
+Seconds passed in this epoch:9.27976 | Seconds passed since the training starts:710.452619
+Epoch 66 training loss: 0.271 training accuracy: 90.524%
+Seconds passed in this epoch:9.117727 | Seconds passed since the training starts:719.57037
+Epoch 67 training loss: 0.272 training accuracy: 90.366%
+Seconds passed in this epoch:9.210852 | Seconds passed since the training starts:728.781245
+Epoch 68 training loss: 0.276 training accuracy: 90.348%
+Seconds passed in this epoch:9.130658 | Seconds passed since the training starts:737.911926
+Epoch 69 training loss: 0.267 training accuracy: 90.710%
+Seconds passed in this epoch:9.449033 | Seconds passed since the training starts:747.360982
+Epoch 70 training loss: 0.273 training accuracy: 90.428%
+Seconds passed in this epoch:9.326635 | Seconds passed since the training starts:756.687642
+Epoch 71 training loss: 0.273 training accuracy: 90.380%
+Seconds passed in this epoch:9.087268 | Seconds passed since the training starts:765.774936
+Epoch 72 training loss: 0.265 training accuracy: 90.586%
+Seconds passed in this epoch:9.16861 | Seconds passed since the training starts:774.943576
+Epoch 73 training loss: 0.265 training accuracy: 90.666%
+Seconds passed in this epoch:9.332095 | Seconds passed since the training starts:784.275693
+Epoch 74 training loss: 0.262 training accuracy: 90.942%
+Seconds passed in this epoch:9.637407 | Seconds passed since the training starts:793.913124
+Epoch 75 training loss: 0.265 training accuracy: 90.742%
+Seconds passed in this epoch:9.226173 | Seconds passed since the training starts:803.13932
+Epoch 76 training loss: 0.265 training accuracy: 90.826%
+Seconds passed in this epoch:9.460189 | Seconds passed since the training starts:812.599532
+Epoch 77 training loss: 0.265 training accuracy: 90.610%
+Seconds passed in this epoch:9.265982 | Seconds passed since the training starts:821.865537
+Epoch 78 training loss: 0.265 training accuracy: 90.676%
+Seconds passed in this epoch:9.398096 | Seconds passed since the training starts:831.263657
+Epoch 79 training loss: 0.264 training accuracy: 90.856%
+Seconds passed in this epoch:9.20315 | Seconds passed since the training starts:840.466831
+Epoch 80 training loss: 0.264 training accuracy: 90.724%
+Seconds passed in this epoch:9.429166 | Seconds passed since the training starts:849.89603
+Epoch 81 training loss: 0.167 training accuracy: 94.312%
+Seconds passed in this epoch:9.179939 | Seconds passed since the training starts:859.075996
+Epoch 82 training loss: 0.135 training accuracy: 95.452%
+Seconds passed in this epoch:9.313453 | Seconds passed since the training starts:868.389474
+Epoch 83 training loss: 0.125 training accuracy: 95.768%
+Seconds passed in this epoch:9.218513 | Seconds passed since the training starts:877.608009
+Epoch 84 training loss: 0.117 training accuracy: 96.054%
+Seconds passed in this epoch:9.201753 | Seconds passed since the training starts:886.809787
+Epoch 85 training loss: 0.114 training accuracy: 96.162%
+Seconds passed in this epoch:9.261822 | Seconds passed since the training starts:896.071633
+Epoch 86 training loss: 0.105 training accuracy: 96.420%
+Seconds passed in this epoch:9.187375 | Seconds passed since the training starts:905.259031
+Epoch 87 training loss: 0.102 training accuracy: 96.554%
+Seconds passed in this epoch:9.204374 | Seconds passed since the training starts:914.463429
+Epoch 88 training loss: 0.098 training accuracy: 96.714%
+Seconds passed in this epoch:9.280835 | Seconds passed since the training starts:923.744289
+Epoch 89 training loss: 0.092 training accuracy: 96.868%
+Seconds passed in this epoch:9.097038 | Seconds passed since the training starts:932.841353
+Epoch 90 training loss: 0.091 training accuracy: 96.876%
+Seconds passed in this epoch:9.210481 | Seconds passed since the training starts:942.051856
+Epoch 91 training loss: 0.090 training accuracy: 96.914%
+Seconds passed in this epoch:9.226787 | Seconds passed since the training starts:951.278672
+Epoch 92 training loss: 0.086 training accuracy: 97.090%
+Seconds passed in this epoch:9.192153 | Seconds passed since the training starts:960.470849
+Epoch 93 training loss: 0.081 training accuracy: 97.276%
+Seconds passed in this epoch:9.335023 | Seconds passed since the training starts:969.805896
+Epoch 94 training loss: 0.079 training accuracy: 97.312%
+Seconds passed in this epoch:9.283563 | Seconds passed since the training starts:979.089484
+Epoch 95 training loss: 0.079 training accuracy: 97.252%
+Seconds passed in this epoch:9.452762 | Seconds passed since the training starts:988.542269
+Epoch 96 training loss: 0.076 training accuracy: 97.424%
+Seconds passed in this epoch:9.685429 | Seconds passed since the training starts:998.227723
+Epoch 97 training loss: 0.075 training accuracy: 97.534%
+Seconds passed in this epoch:9.243674 | Seconds passed since the training starts:1007.471421
+Epoch 98 training loss: 0.074 training accuracy: 97.420%
+Seconds passed in this epoch:9.388676 | Seconds passed since the training starts:1016.860121
+Epoch 99 training loss: 0.070 training accuracy: 97.566%
+Seconds passed in this epoch:9.435724 | Seconds passed since the training starts:1026.295873
+Epoch 100 training loss: 0.069 training accuracy: 97.654%
+Seconds passed in this epoch:9.253559 | Seconds passed since the training starts:1035.549458
+Epoch 101 training loss: 0.068 training accuracy: 97.638%
+Seconds passed in this epoch:9.236628 | Seconds passed since the training starts:1044.786109
+Epoch 102 training loss: 0.066 training accuracy: 97.742%
+Seconds passed in this epoch:9.24607 | Seconds passed since the training starts:1054.032205
+Epoch 103 training loss: 0.067 training accuracy: 97.674%
+Seconds passed in this epoch:9.206444 | Seconds passed since the training starts:1063.238671
+Epoch 104 training loss: 0.064 training accuracy: 97.792%
+Seconds passed in this epoch:9.575112 | Seconds passed since the training starts:1072.813809
+Epoch 105 training loss: 0.063 training accuracy: 97.820%
+Seconds passed in this epoch:9.383848 | Seconds passed since the training starts:1082.197678
+Epoch 106 training loss: 0.062 training accuracy: 97.938%
+Seconds passed in this epoch:9.363249 | Seconds passed since the training starts:1091.560952
+Epoch 107 training loss: 0.059 training accuracy: 98.002%
+Seconds passed in this epoch:9.182345 | Seconds passed since the training starts:1100.743321
+Epoch 108 training loss: 0.058 training accuracy: 98.058%
+Seconds passed in this epoch:9.371408 | Seconds passed since the training starts:1110.114751
+Epoch 109 training loss: 0.062 training accuracy: 97.884%
+Seconds passed in this epoch:9.217383 | Seconds passed since the training starts:1119.332162
+Epoch 110 training loss: 0.060 training accuracy: 97.970%
+Seconds passed in this epoch:9.5921 | Seconds passed since the training starts:1128.924287
+Epoch 111 training loss: 0.057 training accuracy: 98.126%
+Seconds passed in this epoch:9.207748 | Seconds passed since the training starts:1138.132058
+Epoch 112 training loss: 0.056 training accuracy: 98.078%
+Seconds passed in this epoch:9.327102 | Seconds passed since the training starts:1147.459184
+Epoch 113 training loss: 0.054 training accuracy: 98.170%
+Seconds passed in this epoch:9.108211 | Seconds passed since the training starts:1156.567418
+Epoch 114 training loss: 0.054 training accuracy: 98.154%
+Seconds passed in this epoch:9.122376 | Seconds passed since the training starts:1165.689817
+Epoch 115 training loss: 0.052 training accuracy: 98.206%
+Seconds passed in this epoch:9.169517 | Seconds passed since the training starts:1174.859364
+Epoch 116 training loss: 0.052 training accuracy: 98.246%
+Seconds passed in this epoch:9.357312 | Seconds passed since the training starts:1184.216699
+Epoch 117 training loss: 0.052 training accuracy: 98.212%
+Seconds passed in this epoch:9.393549 | Seconds passed since the training starts:1193.610272
+Epoch 118 training loss: 0.053 training accuracy: 98.168%
+Seconds passed in this epoch:9.540659 | Seconds passed since the training starts:1203.150958
+Epoch 119 training loss: 0.052 training accuracy: 98.226%
+Seconds passed in this epoch:9.210246 | Seconds passed since the training starts:1212.36123
+Epoch 120 training loss: 0.048 training accuracy: 98.394%
+Seconds passed in this epoch:9.733137 | Seconds passed since the training starts:1222.094389
+Epoch 121 training loss: 0.051 training accuracy: 98.228%
+Seconds passed in this epoch:9.317145 | Seconds passed since the training starts:1231.411556
+Epoch 122 training loss: 0.043 training accuracy: 98.556%
+Seconds passed in this epoch:9.311951 | Seconds passed since the training starts:1240.723531
+Epoch 123 training loss: 0.039 training accuracy: 98.756%
+Seconds passed in this epoch:9.244751 | Seconds passed since the training starts:1249.968305
+Epoch 124 training loss: 0.037 training accuracy: 98.864%
+Seconds passed in this epoch:9.202734 | Seconds passed since the training starts:1259.171063
+Epoch 125 training loss: 0.037 training accuracy: 98.844%
+Seconds passed in this epoch:9.151443 | Seconds passed since the training starts:1268.32253
+Epoch 126 training loss: 0.035 training accuracy: 98.936%
+Seconds passed in this epoch:9.712974 | Seconds passed since the training starts:1278.035527
+Epoch 127 training loss: 0.034 training accuracy: 98.918%
+Seconds passed in this epoch:9.151448 | Seconds passed since the training starts:1287.186999
+Epoch 128 training loss: 0.034 training accuracy: 98.942%
+Seconds passed in this epoch:9.17197 | Seconds passed since the training starts:1296.358996
+Epoch 129 training loss: 0.033 training accuracy: 99.012%
+Seconds passed in this epoch:9.304881 | Seconds passed since the training starts:1305.663903
+Epoch 130 training loss: 0.035 training accuracy: 98.876%
+Seconds passed in this epoch:9.343947 | Seconds passed since the training starts:1315.007875
+Epoch 131 training loss: 0.034 training accuracy: 98.916%
+Seconds passed in this epoch:9.193028 | Seconds passed since the training starts:1324.200927
+Epoch 132 training loss: 0.033 training accuracy: 99.006%
+Seconds passed in this epoch:9.682526 | Seconds passed since the training starts:1333.883476
+Epoch 133 training loss: 0.034 training accuracy: 98.972%
+Seconds passed in this epoch:9.215007 | Seconds passed since the training starts:1343.098506
+Epoch 134 training loss: 0.033 training accuracy: 99.014%
+Seconds passed in this epoch:9.483062 | Seconds passed since the training starts:1352.581592
+Epoch 135 training loss: 0.033 training accuracy: 98.992%
+Seconds passed in this epoch:9.344443 | Seconds passed since the training starts:1361.926057
+Epoch 136 training loss: 0.033 training accuracy: 99.048%
+Seconds passed in this epoch:9.205156 | Seconds passed since the training starts:1371.131238
+Epoch 137 training loss: 0.031 training accuracy: 99.066%
+Seconds passed in this epoch:9.402704 | Seconds passed since the training starts:1380.533968
+Epoch 138 training loss: 0.034 training accuracy: 98.954%
+Seconds passed in this epoch:9.285516 | Seconds passed since the training starts:1389.81951
+Epoch 139 training loss: 0.033 training accuracy: 98.970%
+Seconds passed in this epoch:9.461839 | Seconds passed since the training starts:1399.281374
+Epoch 140 training loss: 0.032 training accuracy: 99.062%
+Seconds passed in this epoch:9.29153 | Seconds passed since the training starts:1408.572927
+Epoch 141 training loss: 0.031 training accuracy: 99.070%
+Seconds passed in this epoch:9.596967 | Seconds passed since the training starts:1418.169917
+Epoch 142 training loss: 0.030 training accuracy: 99.128%
+Seconds passed in this epoch:10.257288 | Seconds passed since the training starts:1428.427229
+Epoch 143 training loss: 0.033 training accuracy: 98.998%
+Seconds passed in this epoch:9.305566 | Seconds passed since the training starts:1437.732818
+Epoch 144 training loss: 0.030 training accuracy: 99.096%
+Seconds passed in this epoch:9.505233 | Seconds passed since the training starts:1447.238084
+Epoch 145 training loss: 0.031 training accuracy: 98.998%
+Seconds passed in this epoch:9.370707 | Seconds passed since the training starts:1456.608815
+Epoch 146 training loss: 0.030 training accuracy: 99.156%
+Seconds passed in this epoch:9.402112 | Seconds passed since the training starts:1466.010962
+Epoch 147 training loss: 0.032 training accuracy: 99.012%
+Seconds passed in this epoch:9.17493 | Seconds passed since the training starts:1475.185919
+Epoch 148 training loss: 0.030 training accuracy: 99.098%
+Seconds passed in this epoch:9.363917 | Seconds passed since the training starts:1484.54986
+Epoch 149 training loss: 0.030 training accuracy: 99.084%
+Seconds passed in this epoch:9.282441 | Seconds passed since the training starts:1493.832324
+Epoch 150 training loss: 0.032 training accuracy: 99.020%
+Seconds passed in this epoch:9.101462 | Seconds passed since the training starts:1502.933809
+Epoch 151 training loss: 0.029 training accuracy: 99.096%
+Seconds passed in this epoch:9.228467 | Seconds passed since the training starts:1512.162298
+Epoch 152 training loss: 0.030 training accuracy: 99.154%
+Seconds passed in this epoch:9.225083 | Seconds passed since the training starts:1521.387406
+Epoch 153 training loss: 0.030 training accuracy: 99.098%
+Seconds passed in this epoch:9.250928 | Seconds passed since the training starts:1530.638357
+Epoch 154 training loss: 0.030 training accuracy: 99.086%
+Seconds passed in this epoch:9.338856 | Seconds passed since the training starts:1539.977236
+Epoch 155 training loss: 0.030 training accuracy: 99.100%
+Seconds passed in this epoch:9.270948 | Seconds passed since the training starts:1549.248207
+Epoch 156 training loss: 0.030 training accuracy: 99.164%
+Seconds passed in this epoch:9.338081 | Seconds passed since the training starts:1558.586311
+Epoch 157 training loss: 0.029 training accuracy: 99.148%
+Seconds passed in this epoch:9.177666 | Seconds passed since the training starts:1567.764004
+Epoch 158 training loss: 0.029 training accuracy: 99.126%
+Seconds passed in this epoch:9.308696 | Seconds passed since the training starts:1577.072724
+Epoch 159 training loss: 0.029 training accuracy: 99.114%
+Seconds passed in this epoch:9.251311 | Seconds passed since the training starts:1586.324057
+Epoch 160 training loss: 0.028 training accuracy: 99.196%
+Seconds passed in this epoch:9.32143 | Seconds passed since the training starts:1595.645512
+Epoch 161 training loss: 0.029 training accuracy: 99.082%
+Seconds passed in this epoch:9.24714 | Seconds passed since the training starts:1604.892676
+Epoch 162 training loss: 0.029 training accuracy: 99.122%
+Seconds passed in this epoch:9.132447 | Seconds passed since the training starts:1614.025146
+Accuracy of the network on the test set: 90.51%
