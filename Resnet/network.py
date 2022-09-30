@@ -180,7 +180,6 @@ class Bottleneck(nn.Module):
 class ResNet(nn.Module):
     def __init__(self, args):
         super(ResNet, self).__init__()
-        ### YOUR CODE HERE
         version = args.resnet_version
         self.resnet_size = args.resnet_size
         # number of blocks for each part
@@ -215,7 +214,6 @@ class ResNet(nn.Module):
             elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
-        ### END YOUR CODE
 
     def _make_layer(self,block:Type[Union[BasicBlock, Bottleneck]],planes:int,blocks:int,stride:int = 1)-> nn.Sequential:
         norm_layer = self._norm_layer
