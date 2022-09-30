@@ -7,7 +7,7 @@ Generally, I follow the setups mentioned by the paper to my best knowledge (incl
 
 As a result, this implementation can see `90.51%` accuracy on the test set based on the setups below. If normalizing the dataset using the accurate mean and std, probably it will further improve the accuracy.
 
-`log_2022` is the log file using `seed=2022` and `log_2023` is the log file using `seed=2023`. You may have to write extra code to generate the log file yourself. I run the code on a machine using `sbatch` and the file is generated automatically.
+`log_2022` is the log file using `seed=2022` and `log_2023` is the log file using `seed=2023`. You may have to write extra code to generate the log file yourself. I run the code on a machine using `sbatch` and the log file is generated automatically.
 
 
 # Usage
