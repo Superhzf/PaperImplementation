@@ -23,7 +23,7 @@ where
 
 `resnet_size` decides the total layers. The total layers equal `6*resnet_size + 2` for version 1 and `9*resnet_size + 2` for version 2.
 
-# Important parameters and preprocessing:
+# Important parameters and augmentation:
 
 Per the paper, it runs ~64k iterations with the batch size 128. Therefore, the total `epochs` equal 64000//(50000//128) = 164.
 
