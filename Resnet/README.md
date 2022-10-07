@@ -14,7 +14,7 @@ As a result, the `20-layer` model on this implementation can see `90.51%` accura
 
 In the current folder, run:
 
-`python3 main.py -seed 2022 -resnet_version 1 -resnet_size 3 -num_classes 10 -num_epochs 164 -batch 128 -lr 0.1 -drop 0`
+`python3 main.py -seed 2022 -resnet_version 1 -resnet_size 3 -num_classes 10 -num_epochs 164 -batch 128 -lr 0.1`
 
 where
 
