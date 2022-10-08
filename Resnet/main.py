@@ -14,7 +14,6 @@ def get_args():
     parser.add_argument('-num_epochs', type=int, default=20, help='num epochs')
     parser.add_argument('-batch', type=int, default=16, help='batch size')
     parser.add_argument('-lr', type=float, default=0.01, help='learning rate')
-    parser.add_argument('-drop', type=float, default=0.3, help='dropout rate')
     args, _ = parser.parse_known_args()
     return args
 
@@ -28,7 +27,6 @@ if __name__ == '__main__':
     print("args.num_classes",args.num_classes)
     print("args.batch",args.batch)
     print("args.lr",args.lr)
-    print("args.drop",args.drop)
     set_random(args.seed)
     trainloader, testloader = load_data(args.batch)
     net = ResNet(args)

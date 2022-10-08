@@ -192,7 +192,6 @@ class ResNet(nn.Module):
             assert 1 == 0, f"The version number {version} is not understood!"
 
         self.num_classes = args.num_classes
-        self.drop_out = args.drop
         self._norm_layer = nn.BatchNorm2d
         self.inplanes = 16
 
